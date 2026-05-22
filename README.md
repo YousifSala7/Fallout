@@ -30,6 +30,16 @@ Fallout is the successor to **[NUKE](https://github.com/nuke-build/nuke)**, orig
 
 The original NUKE code is preserved here under the MIT License with attribution. Major version 10.x was the last NUKE release; everything from this fork forward carries the Fallout identity.
 
+### Migrating from NUKE
+
+If you maintain a NUKE-based build, **[docs/migration/from-nuke.md](docs/migration/from-nuke.md)** walks you through it. The short version:
+
+```sh
+dotnet tool install -g Fallout.Migrate
+cd path/to/your-nuke-repo
+fallout-migrate
+```
+
 ## Table of Contents
 
 - [Elevator Pitch](#elevator-pitch)

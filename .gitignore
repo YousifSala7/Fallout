@@ -61,6 +61,7 @@ _dotTrace*
 .claude/settings.local.json
 .claude/.credentials*
 .claude/scheduled_tasks.lock
+.claude/worktrees/
 
 # JetBrains
 .junie/memory

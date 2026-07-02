@@ -66,6 +66,10 @@ Images, icons, logos, and other non-code binary content live under `.assets/`. T
 
 Every project under `src/` has a sibling under `tests/` (e.g. `src/Fallout.Common/` → `tests/Fallout.Common.Tests/`).
 
+## Engine internals
+
+This file covers *layout*. For how the build orchestrator works inside — the static-state model, the god class, and the `[Foundation]` de-statification epic that reshapes it (with as-is / to-be diagrams) — see [engine-de-statification.md](engine-de-statification.md).
+
 ## Build conventions
 
 - **Central package versions.** All `PackageReference` versions live in `Directory.Packages.props`. Never inline `Version=` on a `PackageReference` — the build will error.
@@ -87,7 +91,7 @@ Linux runs on PRs because it's cheap and fast; Windows and macOS are reserved fo
 ## What this doc deliberately does NOT cover
 
 - API design decisions inside individual projects — read the project's tests for those.
-- Rebrand status and migration strategy — see `AGENTS.md` and the [Fallout rebrand milestone](https://github.com/ChrisonSimtian/Fallout/milestone/1).
+- Rebrand status and migration strategy — see `AGENTS.md` and the [Fallout rebrand milestone](https://github.com/Fallout-build/Fallout/milestone/1).
 - Contribution workflow — see `CONTRIBUTING.md`.
 
 When in doubt, the structure is whatever this file says it is. If you change the layout, update this file in the same PR.

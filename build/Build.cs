@@ -44,13 +44,10 @@ partial class Build
     AbsolutePath OutputDirectory => RootDirectory / "output";
     AbsolutePath SourceDirectory => RootDirectory / "source";
 
+    // The integration trunk and sole prerelease lane (ADR-0008). Per-commit
+    // -preview prereleases to GitHub Packages (see .github/workflows/preview.yml).
+    // Long-lived + protected, so it needs ubuntu-latest PR/push validation.
     const string MainBranch = "main";
-
-    // The fast / AI-assisted lane (ADR-0004, amended 2026-05-30). Per-commit
-    // -alpha prereleases to GitHub Packages (see .github/workflows/experimental.yml);
-    // breaking work accumulates here for the yearly major. Long-lived + protected,
-    // so it needs the same ubuntu-latest PR/push validation as main.
-    const string ExperimentalBranch = "experimental";
 
     // Glob matching the long-lived release-branch family: CalVer production lines
     // (release/2026, release/2027, ...).
@@ -101,7 +98,7 @@ partial class Build
         from framework in project.GetTargetFrameworks()
         select (project, framework);
 
-    IEnumerable<Fallout.Solutions.Project> ITest.TestProjects => Partition.GetCurrent(Solution.GetAllProjects("*.Tests"));
+    IEnumerable<Fallout.Solutions.Project> ITest.TestProjects => Partition.GetCurrent(Solution.GetAllProjects("*.Specs"));
 
     [Parameter]
     public int TestDegreeOfParallelism { get; } = 1;
@@ -127,30 +124,44 @@ partial class Build
 
     [Parameter] [Secret] readonly string NuGetApiKey;
 
-    // Publishing to nuget.org now that the Fallout.* rename has landed (#54).
-    // Requires NUGET_API_KEY in repo secrets — see release.yml.
-    string IPublish.NuGetSource => "https://api.nuget.org/v3/index.json";
-    string IPublish.NuGetApiKey => NuGetApiKey;
+    // Two publish channels (FALLOUT001 — see IPublish.PublishTargets). Routing replaces the
+    // old single-feed push + the hand-rolled `dotnet nuget push` in the workflows (#333):
+    //   - github-packages: EVERY package, incl. the Nuke.* shims — that ID is owned by the
+    //     original NUKE maintainer (#47), so the shims only ever go here. Keyed by the GitHub token.
+    //   - nuget.org: Fallout.* ONLY, never the Nuke.* shims. Keyed by NUGET_API_KEY.
+    // Select per run from CI with `dotnet fallout Publish --publish-to <name>`. PublishTarget.SkipDuplicate
+    // (default true) keeps re-runs idempotent if a version already exists on a feed.
+#pragma warning disable FALLOUT001 // opting our own build into the experimental multi-channel publish surface
+    IEnumerable<PublishTarget> IPublish.PublishTargets => new[]
+    {
+        new PublishTarget
+        {
+            Name = "github-packages",
+            Source = "https://nuget.pkg.github.com/Fallout-build/index.json",
+            ApiKey = From<ICreateGitHubRelease>().GitHubToken,
+        },
+        new PublishTarget
+        {
+            Name = "nuget.org",
+            Source = "https://api.nuget.org/v3/index.json",
+            ApiKey = NuGetApiKey,
+            IncludePackages = new[] { "Fallout.*" },
+            ExcludePackages = new[] { "Nuke.*" },
+        },
+    };
+#pragma warning restore FALLOUT001
 
+    // The workflows now gate *which* channel publishes (via --publish-to); the on-branch
+    // requirement is gone. We keep a CI guard, though: GitHubToken binds from the
+    // GITHUB_TOKEN env var (ICreateGitHubRelease.GitHubToken), which many developers have
+    // exported — without this, a stray local `dotnet fallout Publish` (no --publish-to →
+    // all targets) would actually push to GitHub Packages. Requiring GitHubActions blocks
+    // local pushes while still allowing every CI lane (preview/release).
     Target IPublish.Publish => _ => _
         .Inherit<IPublish>()
         .Consumes(From<IPack>().Pack)
-        .Requires(() => GitRepository.IsOnMainBranch() && Host is GitHubActions && GitHubActions.Workflow == ReleaseWorkflow)
+        .Requires(() => Host is GitHubActions)
         .WhenSkipped(DependencyBehavior.Execute);
-
-    // Filter `Nuke.*` shim packages out of the nuget.org push — that ID is owned by
-    // the original NUKE maintainer. The shims still build and pack as artifacts; they
-    // are pushed to GitHub Packages by a follow-up step in .github/workflows/release.yml
-    // (#47).
-    IEnumerable<AbsolutePath> IPublish.PushPackageFiles
-        => From<IPack>().PackagesDirectory.GlobFiles("*.nupkg")
-            .Where(x => !x.NameWithoutExtension.StartsWith("Nuke.", StringComparison.OrdinalIgnoreCase));
-
-    // `--skip-duplicate` makes nuget push idempotent: if a version is already on the feed,
-    // skip it instead of erroring. Lets us rerun release.yml safely when a single package
-    // fails mid-batch without nuking the whole pipeline on retry.
-    Configure<DotNetNuGetPushSettings> IPublish.PushSettings => _ => _
-        .EnableSkipDuplicate();
 
     IEnumerable<AbsolutePath> NuGetPackageFiles
         => From<IPack>().PackagesDirectory.GlobFiles("*.nupkg");
@@ -177,7 +188,12 @@ partial class Build
         .TriggeredBy<IPublish>()
         .ProceedAfterFailure()
         .Requires(() => From<ICreateGitHubRelease>().GitHubToken)
-        .OnlyWhenStatic(() => GitRepository.IsOnMainBranch())
+        // Only cut a GitHub Release in the release workflow — never as a side-effect of a
+        // preview publish. This target is TriggeredBy<IPublish>, and since #333 the
+        // preview lane dogfoods `Publish`; gating on IsOnMainBranch alone would
+        // fire it on every preview push to main (it doesn't — GitHub Releases are production-
+        // only, and release.yml hand-rolls them via `gh release create`).
+        .OnlyWhenStatic(() => GitHubActions?.Workflow == ReleaseWorkflow)
         .Executes(async () =>
         {
             var client = GitHubTasks.GitHubClient;

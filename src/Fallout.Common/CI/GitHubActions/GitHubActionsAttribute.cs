@@ -58,6 +58,16 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
     public string[] OnWorkflowDispatchRequiredInputs { get; set; } = new string[0];
     public string OnCronSchedule { get; set; }
 
+    /// <summary>
+    /// Workflow-level environment variables, each entry in <c>KEY: value</c> form. Emitted once as a
+    /// top-level <c>env:</c> block (after <c>on:</c>) and inherited by every job and step — including
+    /// non-run steps such as checkout, cache, and artifact upload, which per-step env can't reach.
+    /// <para/>
+    /// Named <c>Env</c> rather than <c>Environment</c> to avoid confusion with the deployment
+    /// <c>environment:</c> keyword exposed via <see cref="EnvironmentName"/>.
+    /// </summary>
+    public string[] Env { get; set; } = new string[0];
+
     public string[] ImportSecrets { get; set; } = new string[0];
     public bool EnableGitHubToken { get; set; }
     public GitHubActionsPermissions[] WritePermissions { get; set; } = new GitHubActionsPermissions[0];
@@ -71,7 +81,7 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
     public string PublishCondition { get; set; }
 
     public int TimeoutMinutes { get; set; }
-    
+
     public string EnvironmentName { get; set; }
     public string EnvironmentUrl { get; set; }
 
@@ -81,7 +91,26 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
     public string JobConcurrencyGroup { get; set; }
     public bool JobConcurrencyCancelInProgress { get; set; }
 
+    /// <summary>
+    /// Pins the shell for every <c>run:</c> step via a workflow-level <c>defaults.run.shell</c> block,
+    /// so cross-platform matrix jobs use one consistent shell instead of the per-OS default (<c>bash</c>
+    /// on Linux/macOS, <c>pwsh</c> on Windows). Accepts any value GitHub allows — a built-in (<c>bash</c>,
+    /// <c>pwsh</c>, <c>sh</c>, <c>cmd</c>, <c>powershell</c>, <c>python</c>) or a custom <c>command {0}</c>
+    /// template. Unset or whitespace-only emits no <c>defaults:</c> block.
+    /// </summary>
+    public string DefaultShell { get; set; }
+
     public string[] InvokedTargets { get; set; } = new string[0];
+
+    /// <summary>
+    /// Runner labels emitted verbatim as <c>runs-on: [label1, label2, ...]</c>, for selecting a
+    /// self-hosted runner pool by OS/arch/capability (e.g. <c>["self-hosted", "linux", "x64"]</c>).
+    /// <para/>
+    /// When non-empty this replaces the <c>runs-on:</c> image for the job and requires exactly one
+    /// image (no matrix). The constructor-mandated <see cref="GitHubActionsImage"/> is then ignored
+    /// for <c>runs-on:</c> and only names the job.
+    /// </summary>
+    public string[] RunsOnLabels { get; set; } = new string[0];
 
     public GitHubActionsSubmodules Submodules
     {
@@ -129,6 +158,19 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
         get => throw new NotSupportedException();
     }
 
+    /// <summary>
+    /// Extra <c>actions/checkout</c> inputs, emitted verbatim inside the step's <c>with:</c> block after
+    /// the typed keys (<c>submodules</c>, <c>lfs</c>, <c>fetch-depth</c>, <c>progress</c>, <c>filter</c>,
+    /// <c>ref</c>/<c>repository</c>). An escape hatch for inputs the typed knobs don't cover — <c>token</c>,
+    /// <c>ssh-key</c>, <c>path</c>, <c>clean</c>, <c>persist-credentials</c>, <c>sparse-checkout</c>,
+    /// <c>set-safe-directory</c>.
+    /// <para/>
+    /// Each entry is one raw line — passed through unvalidated, so the caller owns correct YAML. Multi-line
+    /// block scalars work by supplying the key (e.g. <c>sparse-checkout: |</c>) and each continuation line
+    /// as separate entries, with the caller's own indentation preserved. Empty emits nothing.
+    /// </summary>
+    public string[] CheckoutWith { get; set; } = new string[0];
+
     public override CustomFileWriter CreateWriter(StreamWriter streamWriter)
     {
         return new CustomFileWriter(streamWriter, indentationFactor: 2, commentPrefix: "#");
@@ -136,15 +178,30 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
 
     public override ConfigurationEntity GetConfiguration(IReadOnlyCollection<ExecutableTarget> relevantTargets)
     {
+        foreach (var variable in Env)
+        {
+            Assert.True(variable != null, $"'{nameof(Env)}' entries must not be null; expected 'KEY: value'");
+
+            var separatorIndex = variable.IndexOf(':');
+            Assert.True(separatorIndex > 0,
+                $"'{nameof(Env)}' entry '{variable}' must be in 'KEY: value' form with a non-empty key");
+            Assert.True(!variable.Substring(startIndex: 0, separatorIndex).Any(char.IsWhiteSpace),
+                $"'{nameof(Env)}' entry '{variable}' has whitespace in its key; expected 'KEY: value'");
+            Assert.True(separatorIndex == variable.Length - 1 || char.IsWhiteSpace(variable[separatorIndex + 1]),
+                $"'{nameof(Env)}' entry '{variable}' must have a space after the key's colon; expected 'KEY: value'");
+        }
+
         var configuration = new GitHubActionsConfiguration
                             {
                                 Name = _name,
                                 ShortTriggers = On,
                                 DetailedTriggers = GetTriggers().ToArray(),
+                                Env = Env,
                                 Permissions = WritePermissions.Select(x => (x, "write"))
                                     .Concat(ReadPermissions.Select(x => (x, "read"))).ToArray(),
                                 ConcurrencyGroup = ConcurrencyGroup,
                                 ConcurrencyCancelInProgress = ConcurrencyCancelInProgress,
+                                DefaultShell = DefaultShell,
                                 Jobs = _images.Select(x => GetJobs(x, relevantTargets)).ToArray()
                             };
 
@@ -152,6 +209,10 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
             $"Workflows can only define either shorthand '{nameof(On)}' or '{nameof(On)}*' triggers");
         Assert.True(configuration.ShortTriggers.Length > 0 || configuration.DetailedTriggers.Length > 0,
             $"Workflows must define either shorthand '{nameof(On)}' or '{nameof(On)}*' triggers");
+        Assert.True(RunsOnLabels.Length == 0 || _images.Length == 1,
+            $"Cannot use '{nameof(RunsOnLabels)}' with multiple images; labels resolve a single job's runner");
+        Assert.True(RunsOnLabels.All(x => !x.IsNullOrWhiteSpace()),
+            $"'{nameof(RunsOnLabels)}' entries must not be null, empty, or whitespace");
 
         return configuration;
     }
@@ -161,9 +222,10 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
         return new GitHubActionsJob
                {
                    Name = image.GetValue().Replace(".", "_"),
+                   RunsOnLabels = RunsOnLabels,
                    EnvironmentName = EnvironmentName,
                    EnvironmentUrl = EnvironmentUrl,
-                   Steps = GetSteps(image, relevantTargets).ToArray(),
+                   Steps = GetSteps(relevantTargets).ToArray(),
                    Image = image,
                    TimeoutMinutes = TimeoutMinutes,
                    ConcurrencyGroup = JobConcurrencyGroup,
@@ -171,7 +233,7 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
                };
     }
 
-    private IEnumerable<GitHubActionsStep> GetSteps(GitHubActionsImage image, IReadOnlyCollection<ExecutableTarget> relevantTargets)
+    private IEnumerable<GitHubActionsStep> GetSteps(IReadOnlyCollection<ExecutableTarget> relevantTargets)
     {
         yield return new GitHubActionsCheckoutStep
                      {
@@ -180,7 +242,8 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
                          FetchDepth = _fetchDepth,
                          Progress = _progress,
                          Filter = _filter,
-                         Ref = _ref
+                         Ref = _ref,
+                         CheckoutWith = CheckoutWith
                      };
 
         if (CacheKeyFiles.Any())

@@ -6,13 +6,13 @@ Fallout welcomes contributions. As a community, we want to help each other, prov
 
 ## Where to start
 
-- Discuss non-trivial changes in an [issue](https://github.com/ChrisonSimtian/Fallout/issues) first.
+- Discuss non-trivial changes in an [issue](https://github.com/Fallout-build/Fallout/issues) first.
 - Small fixes (typos, broken links, tool wrapper additions) can go straight to a PR against `main`.
-- **Two lanes feed the production line.** `main` is the **integration trunk + `-preview` channel** — the default branch where deliberate improvements and bug fixes land. `experimental` is the **fast/AI lane + `-alpha` channel** — intentionally unstable, and the **only** place breaking changes may land (they're batched to the yearly major). **Stable releases ship from `release/YYYY` branches** (the calendar-year production line, the nuget.org tier), and the legacy `support/v10` line takes security/critical fixes only (see [Branching and release flow](docs/branching-and-release.md) and [ADR-0004](docs/adr/0004-calendar-versioning-and-dual-pace-channels.md) for the full model). **Branch from, and PR against, `main` for deliberate non-breaking work; target `experimental` for fast-moving or breaking work.** The only time you target a production branch directly is for a maintainer-driven hotfix — and even then, the fix is forward-ported up the ladder.
+- **`main` feeds the production line.** `main` is the **integration trunk + sole `-preview` channel** — the default branch where both deliberate improvements/bug fixes *and* faster work land. Breaking changes also land on `main`, gated behind `[Experimental("FALLOUT0xx")]` (or held on a short-lived topic branch off `main` when they can't be gated) and batched to the yearly major. **Stable releases ship from `release/YYYY` branches** (the calendar-year production line, the nuget.org tier), and the legacy `support/v10` line takes security/critical fixes only (see [Branching and release flow](docs/branching-and-release.md) and [ADR-0004](docs/adr/0004-calendar-versioning-and-dual-pace-channels.md), as amended by [ADR-0008](docs/adr/0008-collapse-experimental-into-main.md), for the full model). **Branch from, and PR against, `main`.** The only time you target a production branch directly is for a maintainer-driven hotfix.
 
 ## Baseline contributions
 
-- Star the [GitHub project](https://github.com/ChrisonSimtian/Fallout/stargazers) to help others find it.
+- Star the [GitHub project](https://github.com/Fallout-build/Fallout/stargazers) to help others find it.
 - File issues with concrete reproduction steps, version info, and logs.
 - Help triage existing issues — confirming bugs or pointing to fixes counts.
 
@@ -34,16 +34,16 @@ Fallout welcomes contributions. As a community, we want to help each other, prov
 
 - Bugs blocking active enterprise CI/CD usage.
 - Regressions versus the last NUKE 10.x release.
-- Rebrand-track work (see the [Fallout rebrand milestone](https://github.com/ChrisonSimtian/Fallout/milestone/1)).
+- Rebrand-track work (see the [Fallout rebrand milestone](https://github.com/Fallout-build/Fallout/milestone/1)).
 - Demand-driven items where multiple users have weighed in.
 
 ## Pull requests
 
 ### Before opening a PR
 
-- Branch from your PR's base (`main` for deliberate non-breaking work, `experimental` for fast/breaking work). Name your branch `feature/<slug>`, `bugfix/<slug>`, or `chore/<slug>`.
+- Branch from `main` (the base for all PRs). Name your branch `feature/<slug>`, `bugfix/<slug>`, or `chore/<slug>`.
 - Make sure your employer allows the contribution.
-- Read [AGENTS.md](AGENTS.md) for the codebase conventions — package versions go in `Directory.Packages.props`, tests live next to code, no per-file license headers (the `LICENSE` file at the root is the single source of truth). (AGENTS.md is the canonical brief for both human contributors and AI tools; `CLAUDE.md` and `.github/copilot-instructions.md` point to it.)
+- Read [AGENTS.md](AGENTS.md) for the codebase conventions — package versions go in `Directory.Packages.props`, tests live next to code, no per-file license headers (the `LICENSE` file at the root is the single source of truth). (AGENTS.md is the canonical brief for both human contributors and AI tools; GitHub Copilot reads it natively and `CLAUDE.md` points to it.)
 - The bootstrappers are now thin: `./build.ps1` / `./build.sh` provision .NET if needed, then run `dotnet tool restore` + `dotnet fallout "$@"`. The `Fallout.GlobalTools` version is pinned in `.config/dotnet-tools.json`.
 - Run `./build.ps1 Test` (or `./build.sh Test`, or directly `dotnet fallout Test` once your tools are restored) locally first.
 
@@ -54,7 +54,7 @@ Fallout welcomes contributions. As a community, we want to help each other, prov
 - There's no committed `.editorconfig` or ReSharper/`*.DotSettings` file — they were removed during the takeover. Rely on `dotnet format` defaults and review; don't reintroduce them without a maintainer-level decision.
 - Add tests when meaningful — every `Foo` project has a sibling `Foo.Tests`.
 - Don't commit code generated by `./build.ps1 GenerateTools` — generated `.cs` files are regenerated manually once per release.
-- **Label the PR `target/YYYY`** for the calendar year it will release in — default `target/2026`. Legacy `support/v10` maintenance work uses `target/v10`. **Breaking changes are batched to the yearly major cut**: they may land on `experimental` only (never `main`, never a `release/YYYY` production train), are held for next year's `YYYY+1.0.0`, and additionally get a `breaking-change` label, a `⚠️ Breaking change` callout, and a `CHANGELOG.md` entry under the next-major `[Unreleased]` heading. Surface that isn't ready to commit to can ship behind `[Experimental("FALLOUT0xx")]` instead of being held back. See the [PR-creation flow](docs/agents/release-and-versioning.md#pr-creation-flow) for the full procedure.
+- **Label the PR `target/YYYY`** for the calendar year it will release in — default `target/2026`. Legacy `support/v10` maintenance work uses `target/v10`. **Breaking changes are batched to the yearly major cut**: they land on `main` gated behind `[Experimental("FALLOUT0xx")]` (or, when they can't be gated, on a short-lived topic branch off `main`) — never on a `release/YYYY` production train — are held for next year's `YYYY+1.0.0`, and additionally get a `breaking-change` label, a `⚠️ Breaking change` callout, and a `CHANGELOG.md` entry under the next-major `[Unreleased]` heading. Surface that isn't ready to commit to can ship behind `[Experimental("FALLOUT0xx")]` instead of being held back. See the [PR-creation flow](docs/agents/release-and-versioning.md#pr-creation-flow) for the full procedure.
 
 ### Tool wrappers
 
@@ -75,28 +75,27 @@ Tool wrapper JSON lives under `src/Fallout.Common/Tools/<Tool>/<Tool>.json`. Whe
 
 ### After opening a PR
 
-- The PR gate is `ubuntu-latest` only — fires on PRs against `experimental`, `main`, `release/*`, or `support/*`. Docs-only PRs hit a no-op shim workflow that reports the same status check name. `windows-latest` and `macos-latest` run post-merge for cross-platform validation.
-- **Review rises with the ladder.** PRs to `experimental` (alpha) get light, fast review — it's intentionally unstable and no production consumer tracks it. PRs to `main` (preview) get ordinary review — it's the deliberate trunk. Promotion to a `release/YYYY` production train (and the GA cut) gets rigorous, unhurried review — that's the project's quality gate. Match your expectations to where the PR is headed. (Even on the fast lane, requesting a review keeps shared understanding from eroding — please do.)
+- The PR gate is `ubuntu-latest` only — fires on PRs against `main`, `release/*`, or `support/*`. Docs-only PRs hit a no-op shim workflow that reports the same status check name. `windows-latest` and `macos-latest` run post-merge for cross-platform validation.
+- **Review rises with the ladder.** PRs to `main` (preview) get ordinary review — it's the integration trunk. Promotion to a `release/YYYY` production train (and the GA cut) gets rigorous, unhurried review — that's the project's quality gate. Match your expectations to where the PR is headed.
 - Address review feedback in additional commits rather than force-pushing — easier to review the changes.
 - If CI fails on something unrelated to your change, ping a maintainer.
 
 ### Merging
 
-The repo allows both **squash** and **rebase** merge buttons; plain merge commits are disabled (branch protection requires linear history).
+**Rebase is the only merge button.** Squash and plain merge commits are both disabled by repo setting. We keep a **linear history** where every reviewed commit lands on `main` verbatim — it makes per-change diffs easy to read, keeps `git bisect`/`git blame`/revert precise, and gives change control a discrete, traceable record per logical change (a squash would collapse that into one opaque commit).
 
-- **Default to squash.** One PR → one commit on `main`. Cleanest log, tidiest `Nerdbank.GitVersioning` patch-version cadence, easiest revert.
-- **Choose rebase** if you've curated your commits into a logical sequence you want preserved on `main` (and you don't mind interactive-rebasing away review-fixup noise before merge).
-- If you're using rebase, run `git rebase -i` to squash "address review feedback" / "fix typo" commits before requesting final approval — every commit landing on `main` is a bisect target.
+- **Curate your commits before final approval.** Everything you rebase onto `main` becomes a permanent bisect target, so aim for one logical change per commit. Run `git rebase -i` to fold "address review feedback" / "fix typo" noise into the commits it belongs to.
+- **During review, prefer additional commits** (see above) for easy diffing, then tidy them into a clean sequence before the final approval and merge.
 
-The merger (typically a CODEOWNER) picks the button; the PR description can request a preference but isn't binding.
+The merger (typically a CODEOWNER) clicks **Rebase and merge** — there's no button to choose.
 
 ## Releases
 
-Merging to `experimental` publishes an **alpha prerelease** (`2026.MINOR.PATCH-alpha.…`) and merging to `main` publishes a **preview prerelease** (`2026.MINOR.PATCH-preview.…`), both to **GitHub Packages only** — never nuget.org. These are the test/preview lanes. **Stable releases** fire from `release/YYYY` branches via tag push, with a multi-channel publish fan-out (GitHub Packages + GitHub Releases by default; nuget.org is **opt-in**). The full lifecycle is documented in [docs/branching-and-release.md](docs/branching-and-release.md):
+Merging to `main` publishes a **preview prerelease** (`2026.MINOR.PATCH-preview.…`) to **GitHub Packages only** — never nuget.org. This is the preview lane. **Stable releases** fire from `release/YYYY` branches via tag push, with a multi-channel publish fan-out (GitHub Packages + GitHub Releases by default; nuget.org is **opt-in**). The full lifecycle is documented in [docs/branching-and-release.md](docs/branching-and-release.md):
 
 - How releases happen (tag a `release/YYYY` branch, parallel publish jobs)
-- The channel taxonomy (alpha/preview → GitHub Packages; stable → GitHub Packages + GitHub Releases, nuget.org opt-in; Docker local for pre-merge)
-- Promotion + hotfix flow (forward-only `experimental → main → release/YYYY`; the legacy `support/v10` line takes security/critical fixes directly)
+- The channel taxonomy (preview → GitHub Packages; stable → GitHub Packages + GitHub Releases, nuget.org opt-in; Docker local for pre-merge)
+- Promotion + hotfix flow (forward-only `main → release/YYYY`; the legacy `support/v10` line takes security/critical fixes directly)
 - When to cut a new year
 
 Contributors don't usually need to do any of this — releases are maintainer-driven. But if you're filing a PR labelled `target/v10` (legacy maintenance) or one that carries a breaking change held for next year's major, expect the maintainer to route it accordingly.

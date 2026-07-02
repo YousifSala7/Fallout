@@ -32,7 +32,7 @@ Central package versions are pinned in `Directory.Packages.props`; this page lin
 
 | Package | Purpose | Notes |
 |---|---|---|
-| `Azure.Identity`, `Azure.Security.KeyVault.{Certificates,Keys,Secrets}` | Power the `[AzureKeyVaultSecret]` value-injection attribute | Pure consumer-tool surface — currently in `Fallout.Common` but will split out under [#73](https://github.com/ChrisonSimtian/Fallout/issues/73). Consumers who don't use Azure today still pay for these. |
+| `Azure.Identity`, `Azure.Security.KeyVault.{Certificates,Keys,Secrets}` | Power the `[AzureKeyVaultSecret]` value-injection attribute | Pure consumer-tool surface — currently in `Fallout.Common` but will split out under [#73](https://github.com/Fallout-build/Fallout/issues/73). Consumers who don't use Azure today still pay for these. |
 
 ## GitHub
 
@@ -45,8 +45,8 @@ Central package versions are pinned in `Directory.Packages.props`; this page lin
 | Package | Purpose | Notes |
 |---|---|---|
 | `NJsonSchema` + `.NewtonsoftJson` | Generate `build.schema.json` so IDEs can auto-complete `--params` | Drags `Newtonsoft.Json` transitively |
-| `Newtonsoft.Json` | Legacy JSON — direct usage in older codepaths | Long-term consolidation to `System.Text.Json` tracked in [#83](https://github.com/ChrisonSimtian/Fallout/issues/83) |
-| `Scriban` | Templating engine | Used by `Fallout.Cli` Cake rewriter only. **Open CVE NU1903 tracked in [#84](https://github.com/ChrisonSimtian/Fallout/issues/84).** |
+| `Newtonsoft.Json` | Legacy JSON — direct usage in older codepaths | Long-term consolidation to `System.Text.Json` tracked in [#83](https://github.com/Fallout-build/Fallout/issues/83) |
+| `Scriban` | Templating engine | Used by `Fallout.Cli` Cake rewriter only. **Open CVE NU1903 tracked in [#84](https://github.com/Fallout-build/Fallout/issues/84).** |
 
 ## Text, IO, archives
 
@@ -68,13 +68,13 @@ Central package versions are pinned in `Directory.Packages.props`; this page lin
 
 | Package | Purpose | Status |
 |---|---|---|
-| `Microsoft.ApplicationInsights` | Telemetry client | **Dead weight today.** `Telemetry.cs` short-circuits because `InstrumentationKey = ""` (the original NUKE key was matkoch-owned, we don't reuse). Removal tracked in [#79](https://github.com/ChrisonSimtian/Fallout/issues/79). Re-introduce when we stand up a Fallout-owned endpoint. |
+| `Microsoft.ApplicationInsights` | Telemetry client | **Dead weight today.** `Telemetry.cs` short-circuits because `InstrumentationKey = ""` (the original NUKE key was matkoch-owned, we don't reuse). Removal tracked in [#79](https://github.com/Fallout-build/Fallout/issues/79). Re-introduce when we stand up a Fallout-owned endpoint. |
 
 ## Vendored source
 
 | Package | Source | Why vendored |
 |---|---|---|
-| `Fallout.VisualStudio.SolutionPersistence` (assembly name remains `Microsoft.VisualStudio.SolutionPersistence` for drop-in type identity) — published to nuget.org alongside the rest of `Fallout.*`. | Submodule at `vendor/vs-solutionpersistence/` tracking [`ChrisonSimtian/vs-solutionpersistence`](https://github.com/ChrisonSimtian/vs-solutionpersistence) — our fork of [`matkoch/vs-solutionpersistence`](https://github.com/matkoch/vs-solutionpersistence), which itself forked from [`microsoft/vs-solutionpersistence`](https://github.com/microsoft/vs-solutionpersistence). MIT-licensed; full attribution chain preserved. | Upstream Microsoft package ships only `net472` + `net8.0`, no `netstandard2.0`. Our source generator must target `netstandard2.0` (Roslyn requirement). Matt added netstandard2.0 patches that we now own forward. Compiled into the wrapper project `src/Fallout.VisualStudio.SolutionPersistence/` so we control the build infra without touching the submodule. Packs as `Fallout.VisualStudio.SolutionPersistence` so `Fallout.SolutionModel` consumers get a valid transitive dep on nuget.org. |
+| `Fallout.VisualStudio.SolutionPersistence` (assembly name remains `Microsoft.VisualStudio.SolutionPersistence` for drop-in type identity) — published to nuget.org alongside the rest of `Fallout.*`. | Submodule at `vendor/vs-solutionpersistence/` tracking [`Fallout-build/vs-solutionpersistence`](https://github.com/Fallout-build/vs-solutionpersistence) — our fork of [`matkoch/vs-solutionpersistence`](https://github.com/matkoch/vs-solutionpersistence), which itself forked from [`microsoft/vs-solutionpersistence`](https://github.com/microsoft/vs-solutionpersistence). MIT-licensed; full attribution chain preserved. | Upstream Microsoft package ships only `net472` + `net8.0`, no `netstandard2.0`. Our source generator must target `netstandard2.0` (Roslyn requirement). Matt added netstandard2.0 patches that we now own forward. Compiled into the wrapper project `src/Fallout.VisualStudio.SolutionPersistence/` so we control the build infra without touching the submodule. Packs as `Fallout.VisualStudio.SolutionPersistence` so `Fallout.SolutionModel` consumers get a valid transitive dep on nuget.org. |
 
 ## ⚠️ Matt-era personal forks — to replace
 
@@ -82,7 +82,7 @@ Still on Matt's personal NuGet account; supply-chain SPOF, high-priority to repl
 
 | Package | Upstream equivalent | Tracked in |
 |---|---|---|
-| `matkoch.spectre.console` | `Spectre.Console` | [#78](https://github.com/ChrisonSimtian/Fallout/issues/78) — confirmed clean swap, just needs the PR |
+| `matkoch.spectre.console` | `Spectre.Console` | [#78](https://github.com/Fallout-build/Fallout/issues/78) — confirmed clean swap, just needs the PR |
 
 ## Testing
 
@@ -90,12 +90,16 @@ Still on Matt's personal NuGet account; supply-chain SPOF, high-priority to repl
 |---|---|
 | `xunit` (+ `runner.visualstudio`) | Test framework |
 | `Microsoft.NET.Test.Sdk` | Test host wiring |
-| `FluentAssertions` | Readable assertion DSL |
+| `FluentAssertions` | Readable assertion DSL — see [licensing note](#fluentassertions-licensing) below |
 | `Verify.Xunit` (+ `.DiffPlex`, `.SourceGenerators`) | Snapshot-based testing (the `*.verified.txt` / `*.received.txt` pattern) |
 | `coverlet.msbuild` | Code coverage |
 | `GitHubActionsTestLogger` | Format test output for GitHub Actions annotations |
 | `Basic.Reference.Assemblies.NetStandard20` | Reference assemblies for source-generator compile tests |
 | `NetArchTest.Rules` | Architecture-fitness tests (e.g. `Fallout.Core` purity); broader suite tracked in #95 |
+
+### FluentAssertions licensing
+
+As of **v8.0** (Jan 2025) FluentAssertions dropped Apache 2.0 for the proprietary **Xceed Community License**: free for open-source / non-commercial use, paid (per-seat) for commercial use. v7.x remains Apache 2.0. We pin **8.x** (`Directory.Packages.props`) and stay current — this is fine for Fallout because it's (a) an OSS project covered by the free community license, and (b) a **test-only / dev-time** dependency that is never redistributed to consumers of the framework. The standard assertion convention (xUnit + FluentAssertions + Verify) is unchanged — see [conventions.md](agents/conventions.md).
 
 ## Build-time CLI tools (`PackageDownload`)
 
@@ -104,10 +108,10 @@ These are downloaded by `build/_build.csproj` for use during this repo's own bui
 | Tool | Purpose | Status |
 |---|---|---|
 | `ReportGenerator` | HTML coverage reports | Active. |
-| `JetBrains.ReSharper.GlobalTools` | InspectCode (static analysis) | **Decision pending** ([#75](https://github.com/ChrisonSimtian/Fallout/issues/75)) — keep, drop, or just drop from this repo's build. |
-| `Codecov.Tool` | Upload coverage to codecov.io | **Likely dead** — `IReportCoverage.ReportToCodecov` is `false`. Removal tracked in [#80](https://github.com/ChrisonSimtian/Fallout/issues/80). |
-| `GitVersion.Tool` | Version computation (legacy) | **Transitional** — fully replace with `Nerdbank.GitVersioning` per [#81](https://github.com/ChrisonSimtian/Fallout/issues/81). |
-| `xunit.runner.console` | Standalone xunit runner | **Likely redundant** with `Microsoft.NET.Test.Sdk`. Removal tracked in [#82](https://github.com/ChrisonSimtian/Fallout/issues/82). |
+| `JetBrains.ReSharper.GlobalTools` | InspectCode (static analysis) | **Decision pending** ([#75](https://github.com/Fallout-build/Fallout/issues/75)) — keep, drop, or just drop from this repo's build. |
+| `Codecov.Tool` | Upload coverage to codecov.io | **Likely dead** — `IReportCoverage.ReportToCodecov` is `false`. Removal tracked in [#80](https://github.com/Fallout-build/Fallout/issues/80). |
+| `GitVersion.Tool` | Version computation (legacy) | **Transitional** — fully replace with `Nerdbank.GitVersioning` per [#81](https://github.com/Fallout-build/Fallout/issues/81). |
+| `xunit.runner.console` | Standalone xunit runner | **Likely redundant** with `Microsoft.NET.Test.Sdk`. Removal tracked in [#82](https://github.com/Fallout-build/Fallout/issues/82). |
 
 ---
 

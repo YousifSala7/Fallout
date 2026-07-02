@@ -96,9 +96,7 @@ partial class Program
 
         WriteBuildScripts(
             scriptDirectory: WorkingDirectory,
-            rootDirectory,
-            buildDirectory,
-            buildProjectName);
+            rootDirectory);
 
         WriteConfigurationFile(rootDirectory, solutionFile);
 
@@ -178,17 +176,15 @@ partial class Program
             "EndProject");
     }
 
-    private static string[] GetTemplate(string templateName)
+    internal static string[] GetTemplate(string templateName)
     {
         return ResourceUtility.GetResourceAllLines<Program>($"templates.{templateName}");
     }
 
 
-    private static void WriteBuildScripts(
+    internal static void WriteBuildScripts(
         AbsolutePath scriptDirectory,
-        AbsolutePath rootDirectory,
-        AbsolutePath buildDirectory,
-        string buildProjectName)
+        AbsolutePath rootDirectory)
     {
         (scriptDirectory / "build.sh").WriteAllLines(
             FillTemplate(
@@ -243,7 +239,7 @@ partial class Program
         }
     }
 
-    private static void WriteConfigurationFile(AbsolutePath rootDirectory, AbsolutePath solutionFile)
+    internal static void WriteConfigurationFile(AbsolutePath rootDirectory, AbsolutePath solutionFile)
     {
         var parametersFile = GetDefaultParametersFile(rootDirectory);
         var dictionary = new Dictionary<string, string> { ["$schema"] = BuildSchemaFileName };

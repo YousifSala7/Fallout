@@ -2,28 +2,15 @@
 using System.Threading.Tasks;
 using Fallout.Common.CI.AzurePipelines;
 using Fallout.Common.CI.AzurePipelines.Configuration;
-using Fallout.Common.Utilities;
-using VerifyXunit;
 using Xunit;
 
 namespace Fallout.Common.Specs.CI;
 
 public class AzurePipelinesJobSpecs
 {
-    private static Task Verify(AzurePipelinesJob job)
-    {
-        var stream = new MemoryStream();
-        var writer = new StreamWriter(stream, leaveOpen: true);
-        job.Write(new CustomFileWriter(writer, indentationFactor: 2, commentPrefix: "#"));
-        writer.Flush();
-
-        stream.Seek(offset: 0, SeekOrigin.Begin);
-        return Verifier.Verify(new StreamReader(stream).ReadToEnd());
-    }
-
     [Fact]
     public Task DisplayName_with_an_apostrophe_is_yaml_escaped()
-        => Verify(new AzurePipelinesJob
+        => ConfigurationEntityVerifier.Verify(new AzurePipelinesJob
                   {
                       Name = "Compile",
                       DisplayName = "Bob's Job",
@@ -33,7 +20,7 @@ public class AzurePipelinesJobSpecs
 
     [Fact]
     public Task VmImage_is_quoted_correctly_without_double_wrapping_quirk()
-        => Verify(new AzurePipelinesJob
+        => ConfigurationEntityVerifier.Verify(new AzurePipelinesJob
                   {
                       Name = "Compile",
                       DisplayName = "Compile Job",

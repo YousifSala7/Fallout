@@ -26,7 +26,7 @@ public class AzurePipelinesJobSpecs
         => Verify(new AzurePipelinesJob
                   {
                       Name = "Compile",
-                      DisplayName = "Yousif's Job",
+                      DisplayName = "Bob's Job",
                       Dependencies = new AzurePipelinesJob[0],
                       Steps = new AzurePipelinesStep[0]
                   });

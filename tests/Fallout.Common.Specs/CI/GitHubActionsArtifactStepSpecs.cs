@@ -22,5 +22,5 @@ public class GitHubActionsArtifactStepSpecs
 
     [Fact]
     public Task Name_with_an_apostrophe_is_yaml_escaped()
-        => Verify(new GitHubActionsArtifactStep { Name = "Yousif's Build", Path = "out", Condition = "" });
+        => Verify(new GitHubActionsArtifactStep { Name = "Bob's Build", Path = "out", Condition = "" });
 }

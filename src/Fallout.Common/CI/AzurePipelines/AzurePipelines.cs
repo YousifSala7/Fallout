@@ -175,7 +175,7 @@ public partial class AzurePipelines : Host, IBuildServer
                 .AddPairWhenValueNotNull("mergeResults", mergeResults)
                 .AddPairWhenValueNotNull("platform", platform)
                 .AddPairWhenValueNotNull("config", configuration)
-                .AddPairWhenValueNotNull("runTitle", title.SingleQuote())
+                .AddPairWhenValueNotNull("runTitle", title.SingleQuoteYaml())
                 .AddPairWhenValueNotNull("publishRunAttachments", publishRunAttachments));
     }
 

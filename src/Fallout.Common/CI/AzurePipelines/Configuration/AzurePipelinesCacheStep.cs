@@ -27,7 +27,7 @@ public class AzurePipelinesCacheStep : AzurePipelinesStep
     {
         using (writer.WriteBlock("- task: Cache@2"))
         {
-            writer.WriteLine("displayName: " + $"Cache: {Identifier}".SingleQuote());
+            writer.WriteLine("displayName: " + $"Cache: {Identifier}".SingleQuoteYaml());
             using (writer.WriteBlock("inputs:"))
             {
                 writer.WriteLine($"key: $(Agent.OS) | {Identifier} | {KeyFiles.JoinCommaSpace()}");

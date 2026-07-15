@@ -17,7 +17,7 @@ public class AzurePipelinesCmdStep : AzurePipelinesStep
     {
         using (writer.WriteBlock("- task: CmdLine@2"))
         {
-            writer.WriteLine("displayName: " + $"Run: {InvokedTargets.JoinCommaSpace()}".SingleQuote());
+            writer.WriteLine("displayName: " + $"Run: {InvokedTargets.JoinCommaSpace()}".SingleQuoteYaml());
 
             var arguments = $"{InvokedTargets.JoinSpace()} --skip";
             if (PartitionSize != null)

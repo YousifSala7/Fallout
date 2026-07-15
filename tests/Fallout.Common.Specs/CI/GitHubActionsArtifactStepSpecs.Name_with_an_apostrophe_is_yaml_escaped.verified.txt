@@ -1,0 +1,5 @@
+﻿- name: 'Publish: Yousif''s Build'
+  uses: actions/upload-artifact@v5
+  with:
+    name: Yousif's Build
+    path: out

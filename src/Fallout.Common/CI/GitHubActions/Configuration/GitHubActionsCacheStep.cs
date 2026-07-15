@@ -14,7 +14,7 @@ public class GitHubActionsCacheStep : GitHubActionsStep
 
     public override void Write(CustomFileWriter writer)
     {
-        writer.WriteLine("- name: " + $"Cache: {IncludePatterns.JoinCommaSpace()}".SingleQuote());
+        writer.WriteLine("- name: " + $"Cache: {IncludePatterns.JoinCommaSpace()}".SingleQuoteYaml());
         using (writer.Indent())
         {
             writer.WriteLine("uses: actions/cache@v4");
@@ -24,7 +24,7 @@ public class GitHubActionsCacheStep : GitHubActionsStep
                 writer.WriteLine("path: |");
                 IncludePatterns.ForEach(x => writer.WriteLine($"  {x}"));
                 ExcludePatterns.ForEach(x => writer.WriteLine($"  !{x}"));
-                writer.WriteLine($"key: ${{{{ runner.os }}}}-${{{{ hashFiles({KeyFiles.Select(x => x.SingleQuote()).JoinCommaSpace()}) }}}}");
+                writer.WriteLine($"key: ${{{{ runner.os }}}}-${{{{ hashFiles({KeyFiles.Select(x => x.SingleQuoteYaml()).JoinCommaSpace()}) }}}}");
             }
         }
     }

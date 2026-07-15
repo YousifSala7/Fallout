@@ -19,14 +19,14 @@ public class AzurePipelinesJob : ConfigurationEntity
     {
         using (writer.WriteBlock($"- job: {Name}"))
         {
-            writer.WriteLine($"displayName: {DisplayName.SingleQuote()}");
+            writer.WriteLine($"displayName: {DisplayName.SingleQuoteYaml()}");
             writer.WriteLine($"dependsOn: [ {Dependencies.Select(x => x.Name).JoinCommaSpace()} ]");
 
             if (Image != null)
             {
                 using (writer.WriteBlock("pool:"))
                 {
-                    writer.WriteLine($"vmImage: {Image.Value.GetValue().SingleQuote().SingleQuote()}");
+                    writer.WriteLine($"vmImage: {Image.Value.GetValue().SingleQuoteYaml()}");
                 }
             }
 

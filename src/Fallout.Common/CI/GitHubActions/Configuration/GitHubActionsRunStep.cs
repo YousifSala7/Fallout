@@ -28,7 +28,7 @@ public class GitHubActionsRunStep : GitHubActionsStep
             writer.WriteLine("run: dotnet tool restore");
         }
 
-        writer.WriteLine("- name: " + $"Run: {InvokedTargets.JoinCommaSpace()}".SingleQuote());
+        writer.WriteLine("- name: " + $"Run: {InvokedTargets.JoinCommaSpace()}".SingleQuoteYaml());
         using (writer.Indent())
         {
             writer.WriteLine($"run: dotnet fallout {InvokedTargets.JoinSpace()}");

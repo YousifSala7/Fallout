@@ -13,11 +13,11 @@ public class AzurePipelinesPublishStep : AzurePipelinesStep
     {
         using (writer.WriteBlock("- task: PublishBuildArtifacts@1"))
         {
-            writer.WriteLine("displayName: " + $"Publish: {ArtifactName}".SingleQuote());
+            writer.WriteLine("displayName: " + $"Publish: {ArtifactName}".SingleQuoteYaml());
             using (writer.WriteBlock("inputs:"))
             {
                 writer.WriteLine($"artifactName: {ArtifactName}");
-                writer.WriteLine($"pathToPublish: {PathToPublish.SingleQuote()}");
+                writer.WriteLine($"pathToPublish: {PathToPublish.SingleQuoteYaml()}");
             }
         }
     }

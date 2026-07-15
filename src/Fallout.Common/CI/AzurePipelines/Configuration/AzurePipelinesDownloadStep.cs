@@ -17,7 +17,7 @@ public class AzurePipelinesDownloadStep : AzurePipelinesStep
             using (writer.WriteBlock("inputs:"))
             {
                 writer.WriteLine($"artifactName: {ArtifactName}");
-                writer.WriteLine($"downloadPath: {DownloadPath.SingleQuote()}");
+                writer.WriteLine($"downloadPath: {DownloadPath.SingleQuoteYaml()}");
             }
         }
     }

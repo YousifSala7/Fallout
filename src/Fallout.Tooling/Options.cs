@@ -77,7 +77,7 @@ public class Options : IOptions
         }
     }
 
-    internal static JsonConverter LookupTableConverter = new ObjectFromFieldConverter(typeof(LookupTable<,>), "_dictionary");
+    internal static JsonConverter LookupTableConverter = new ObjectFromFieldConverter(typeof(LookupTable<,>), "lookupDictionary");
 
     internal static JsonSerializerOptions SerializerOptions { get; } = CreateSerializerOptions();
 

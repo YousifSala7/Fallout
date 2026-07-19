@@ -12,13 +12,13 @@ namespace Fallout.Common.Execution;
 
 internal class TargetDefinition : ITargetDefinition
 {
-    private readonly Stack<PropertyInfo> _baseMembers;
+    private readonly Stack<PropertyInfo> baseMembers;
 
     public TargetDefinition(PropertyInfo target, IFalloutBuild build, Stack<PropertyInfo> baseMembers)
     {
         Target = target;
         Build = build;
-        _baseMembers = baseMembers;
+        this.baseMembers = baseMembers;
     }
 
     public PropertyInfo Target { get; }
@@ -247,10 +247,10 @@ internal class TargetDefinition : ITargetDefinition
 
     public ITargetDefinition Base()
     {
-        Assert.True(_baseMembers.Count > 0,
+        Assert.True(baseMembers.Count > 0,
             $"Target '{Target.DeclaringType}.{Target.Name}' does not have any base members."
             + $" To inherit from an interface default implementation, use {nameof(Inherit)}<T> instead.");
-        Inherit(_baseMembers.Pop().GetValueNonVirtual<Target>(Build));
+        Inherit(baseMembers.Pop().GetValueNonVirtual<Target>(Build));
         return this;
     }
 

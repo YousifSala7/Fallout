@@ -8,13 +8,13 @@ namespace Fallout.CodeGeneration.Writers;
 
 public class ToolWriter : IDisposable, IWriter, IWriterWrapper
 {
-    private readonly StreamWriter _streamWriter;
-    private int _indention;
+    private readonly StreamWriter streamWriter;
+    private int indention;
 
     public ToolWriter(Tool tool, StreamWriter streamWriter)
     {
         Tool = tool;
-        _streamWriter = streamWriter;
+        this.streamWriter = streamWriter;
     }
 
     public Tool Tool { get; }
@@ -22,20 +22,20 @@ public class ToolWriter : IDisposable, IWriter, IWriterWrapper
 
     public void Dispose()
     {
-        _streamWriter.Dispose();
+        streamWriter.Dispose();
     }
 
     void IWriter.WriteLine(string text)
     {
-        _streamWriter.WriteLine($"{' '.Repeat(_indention * 4)}{text}");
+        streamWriter.WriteLine($"{' '.Repeat(indention * 4)}{text}");
     }
 
     void IWriter.WriteBlock(Action action)
     {
         this.WriteLine("{");
-        _indention++;
+        indention++;
         action();
-        _indention--;
+        indention--;
         this.WriteLine("}");
     }
 }

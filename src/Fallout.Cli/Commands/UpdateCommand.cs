@@ -20,15 +20,15 @@ namespace Fallout.Cli.Commands;
 /// </summary>
 internal sealed class UpdateCommand : IFalloutCommand
 {
-    private readonly IConsolePrompts _prompts;
-    private readonly IConfigurationReader _configuration;
-    private readonly IBuildScaffolder _scaffolder;
+    private readonly IConsolePrompts prompts;
+    private readonly IConfigurationReader configuration;
+    private readonly IBuildScaffolder scaffolder;
 
     public UpdateCommand(IConsolePrompts prompts, IConfigurationReader configuration, IBuildScaffolder scaffolder)
     {
-        _prompts = prompts;
-        _configuration = configuration;
-        _scaffolder = scaffolder;
+        this.prompts = prompts;
+        this.configuration = configuration;
+        this.scaffolder = scaffolder;
     }
 
     public string Name => "update";
@@ -42,28 +42,28 @@ internal sealed class UpdateCommand : IFalloutCommand
 
         if (buildScript != null)
         {
-            _prompts.ConfirmExecution("Update build scripts", () => UpdateBuildScripts(rootDirectory, buildScript));
-            await _prompts.ConfirmExecutionAsync("Update build project", () => UpdateBuildProjectAsync(buildScript));
+            prompts.ConfirmExecution("Update build scripts", () => UpdateBuildScripts(rootDirectory, buildScript));
+            await prompts.ConfirmExecutionAsync("Update build project", () => UpdateBuildProjectAsync(buildScript));
         }
 
-        _prompts.ConfirmExecution("Update configuration file", () => UpdateConfigurationFile(rootDirectory));
-        _prompts.ConfirmExecution("Update global.json", () => UpdateGlobalJsonFile(rootDirectory));
+        prompts.ConfirmExecution("Update configuration file", () => UpdateConfigurationFile(rootDirectory));
+        prompts.ConfirmExecution("Update global.json", () => UpdateGlobalJsonFile(rootDirectory));
 
-        _prompts.ShowCompletion("Updates");
+        prompts.ShowCompletion("Updates");
 
         return 0;
     }
 
     private void UpdateBuildScripts(AbsolutePath rootDirectory, AbsolutePath buildScript)
     {
-        _scaffolder.WriteBuildScripts(
+        scaffolder.WriteBuildScripts(
             scriptDirectory: buildScript.Parent,
             rootDirectory);
     }
 
     private async Task UpdateBuildProjectAsync(AbsolutePath buildScript)
     {
-        var configuration = _configuration.Read(buildScript, evaluate: true);
+        var configuration = this.configuration.Read(buildScript, evaluate: true);
         var projectFile = configuration[ConfigurationReader.BuildProjectFileKey];
 
         ProjectModelTasks.Initialize();
@@ -135,7 +135,7 @@ internal sealed class UpdateCommand : IFalloutCommand
         var solutionFile = rootDirectory / configurationFile.ReadAllLines().FirstOrDefault(x => !x.IsNullOrEmpty());
         configurationFile.DeleteFile();
 
-        _scaffolder.WriteConfigurationFile(rootDirectory, solutionFile);
+        scaffolder.WriteConfigurationFile(rootDirectory, solutionFile);
         Host.Warning($"The previous {FalloutFileName} file was transformed to a {FalloutDirectoryName} directory.");
         Host.Warning($"The .tmp directory can be cleared, as it is moved to {FalloutDirectoryName}/temp as well.");
         if (solutionFile != null)

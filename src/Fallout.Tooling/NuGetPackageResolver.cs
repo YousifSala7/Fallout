@@ -331,12 +331,12 @@ public static class NuGetPackageResolver
             }
         }
 
-        private readonly Lazy<NuspecReader> _metadata;
+        private readonly Lazy<NuspecReader> metadata;
 
         public InstalledPackage(AbsolutePath file)
         {
             File = file;
-            _metadata = new Lazy<NuspecReader>(() =>
+            metadata = new Lazy<NuspecReader>(() =>
             {
                 var directory = new DirectoryInfo(Path.GetDirectoryName(file));
                 return directory.GetFiles("*.nuspec").Length == 1
@@ -347,7 +347,7 @@ public static class NuGetPackageResolver
 
         public AbsolutePath File { get; }
         public AbsolutePath Directory => File.Parent.NotNull();
-        public NuspecReader Metadata => _metadata.Value;
+        public NuspecReader Metadata => metadata.Value;
         public string Id => Metadata.GetIdentity().Id;
         public NuGetVersion Version => Metadata.GetIdentity().Version;
 

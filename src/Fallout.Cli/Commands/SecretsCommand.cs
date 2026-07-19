@@ -26,9 +26,9 @@ internal sealed class SecretsCommand : IFalloutCommand
     private const string DiscardAndExit = "<Discard & Exit>";
     private const string DeletePasswordAndExit = "<Delete Password & Exit>";
 
-    private readonly IConsolePrompts _prompts;
+    private readonly IConsolePrompts prompts;
 
-    public SecretsCommand(IConsolePrompts prompts) => _prompts = prompts;
+    public SecretsCommand(IConsolePrompts prompts) => this.prompts = prompts;
 
     public string Name => "secrets";
 
@@ -76,7 +76,7 @@ internal sealed class SecretsCommand : IFalloutCommand
 
         if (EnvironmentInfo.IsOsx && existingSecrets.Count == 0 && !fromCredentialStore)
         {
-            if (generatedPassword || _prompts.PromptForConfirmation($"Save password to keychain? (associated with '{rootDirectory}')"))
+            if (generatedPassword || prompts.PromptForConfirmation($"Save password to keychain? (associated with '{rootDirectory}')"))
                 CredentialStore.SavePassword(credentialStoreName, password);
         }
         else if (fromLegacyCredentialStore)
@@ -92,13 +92,13 @@ internal sealed class SecretsCommand : IFalloutCommand
         var addedSecrets = new Dictionary<string, string>();
         while (true)
         {
-            var choice = _prompts.PromptForChoice(
+            var choice = prompts.PromptForChoice(
                 "Choose secret parameter to enter value:",
                 options.Select(x => (x, addedSecrets.ContainsKey(x) || existingSecrets.ContainsKey(x) ? $"* {x}" : x)).ToArray());
 
             if (!choice.EqualsAnyOrdinalIgnoreCase(SaveAndExit, DiscardAndExit, DeletePasswordAndExit))
             {
-                addedSecrets[choice] = _prompts.PromptForSecret(choice);
+                addedSecrets[choice] = prompts.PromptForSecret(choice);
             }
             else
             {

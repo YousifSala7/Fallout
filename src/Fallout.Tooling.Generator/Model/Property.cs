@@ -10,13 +10,13 @@ namespace Fallout.CodeGeneration.Model;
 [Serializable]
 public class Property : IDeprecatable
 {
-    [NonSerialized] private DataClass _dataClass;
+    [NonSerialized] private DataClass dataClass;
 
     [JsonIgnore]
     public DataClass DataClass
     {
-        get => _dataClass;
-        set => _dataClass = value;
+        get => dataClass;
+        set => dataClass = value;
     }
 
     [JsonIgnore]

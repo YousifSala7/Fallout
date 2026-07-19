@@ -12,11 +12,11 @@ namespace Fallout.Common.Tooling;
 
 public class LatestGitHubReleaseAttribute : ValueInjectionAttributeBase
 {
-    private readonly string _identifier;
+    private readonly string identifier;
 
     public LatestGitHubReleaseAttribute(string identifier)
     {
-        _identifier = identifier;
+        this.identifier = identifier;
     }
 
     public bool IncludePrerelease { get; set; }
@@ -26,7 +26,7 @@ public class LatestGitHubReleaseAttribute : ValueInjectionAttributeBase
 
     public override object GetValue(MemberInfo member, object instance)
     {
-        var repository = GitRepository.FromUrl($"https://github.com/{_identifier}");
+        var repository = GitRepository.FromUrl($"https://github.com/{identifier}");
         var releases = GitHubTasks.GitHubClient.Repository.Release
             .GetAll(repository.GetGitHubOwner(), repository.GetGitHubName()).GetAwaiter().GetResult();
         var versions = releases

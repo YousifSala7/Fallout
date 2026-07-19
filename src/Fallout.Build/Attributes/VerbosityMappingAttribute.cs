@@ -8,11 +8,11 @@ namespace Fallout.Common.Tooling;
 
 public class VerbosityMappingAttribute : BuildExtensionAttributeBase, IOnBuildInitialized
 {
-    private readonly Type _targetType;
+    private readonly Type targetType;
 
     public VerbosityMappingAttribute(Type targetType)
     {
-        _targetType = targetType;
+        this.targetType = targetType;
     }
 
     public string Quiet { get; set; }
@@ -25,19 +25,19 @@ public class VerbosityMappingAttribute : BuildExtensionAttributeBase, IOnBuildIn
         IReadOnlyCollection<ExecutableTarget> executionPlan)
     {
         object GetMappedValue(string name)
-            => _targetType
+            => targetType
                 .GetField(name)
-                .NotNull($"Type {_targetType} doesn't have a field {name}.")
+                .NotNull($"Type {targetType} doesn't have a field {name}.")
                 .GetValue(obj: null);
 
         if (Quiet != null)
-            VerbosityMapping.Mappings.Add(_targetType, (Verbosity.Quiet, GetMappedValue(Quiet)));
+            VerbosityMapping.Mappings.Add(targetType, (Verbosity.Quiet, GetMappedValue(Quiet)));
         if (Minimal != null)
-            VerbosityMapping.Mappings.Add(_targetType, (Verbosity.Minimal, GetMappedValue(Minimal)));
+            VerbosityMapping.Mappings.Add(targetType, (Verbosity.Minimal, GetMappedValue(Minimal)));
         if (Normal != null)
-            VerbosityMapping.Mappings.Add(_targetType, (Verbosity.Normal, GetMappedValue(Normal)));
+            VerbosityMapping.Mappings.Add(targetType, (Verbosity.Normal, GetMappedValue(Normal)));
         if (Verbose != null)
-            VerbosityMapping.Mappings.Add(_targetType, (Verbosity.Verbose, GetMappedValue(Verbose)));
+            VerbosityMapping.Mappings.Add(targetType, (Verbosity.Verbose, GetMappedValue(Verbose)));
     }
 }
 

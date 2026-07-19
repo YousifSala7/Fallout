@@ -26,7 +26,7 @@ public static class SchemaUtility
     private const string DraftSchema = "http://json-schema.org/draft-04/schema#";
     private const string DefinitionsPrefix = "#/definitions/";
 
-    private static readonly JsonSerializerOptions s_writeOptions = new()
+    private static readonly JsonSerializerOptions writeOptions = new()
     {
         WriteIndented = true,
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
@@ -35,7 +35,7 @@ public static class SchemaUtility
     public static string GetJsonString(IFalloutBuild build)
     {
         // Trailing newline matches the legacy NJsonSchema output that consumer-side tooling expects.
-        return BuildSchema(build).ToJsonString(s_writeOptions) + "\n";
+        return BuildSchema(build).ToJsonString(writeOptions) + "\n";
     }
 
     public static JsonDocument GetJsonDocument(IFalloutBuild build)

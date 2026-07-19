@@ -15,15 +15,15 @@ namespace Fallout.Common.CI.AzurePipelines;
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class AzurePipelinesAttribute : ChainedConfigurationAttributeBase
 {
-    private readonly string _suffix;
-    private readonly AzurePipelinesImage[] _images;
+    private readonly string suffix;
+    private readonly AzurePipelinesImage[] images;
 
-    private bool? _triggerBatch;
-    private bool? _pullRequestsAutoCancel;
-    private bool? _submodules;
-    private bool? _largeFileStorage;
-    private int? _fetchDepth;
-    private bool? _clean;
+    private bool? triggerBatch;
+    private bool? pullRequestsAutoCancel;
+    private bool? submodules;
+    private bool? largeFileStorage;
+    private int? fetchDepth;
+    private bool? clean;
 
     public AzurePipelinesAttribute(
         AzurePipelinesImage image,
@@ -37,17 +37,17 @@ public class AzurePipelinesAttribute : ChainedConfigurationAttributeBase
         AzurePipelinesImage image,
         params AzurePipelinesImage[] images)
     {
-        _suffix = suffix?.Replace(oldChar: ' ', newChar: '_');
-        _images = new[] { image }.Concat(images).ToArray();
+        this.suffix = suffix?.Replace(oldChar: ' ', newChar: '_');
+        this.images = new[] { image }.Concat(images).ToArray();
     }
 
-    public override string IdPostfix => _suffix;
+    public override string IdPostfix => suffix;
 
     public override Type HostType => typeof(AzurePipelines);
     public override AbsolutePath ConfigurationFile => ConfigurationDirectory / ConfigurationFileName;
     public override IEnumerable<AbsolutePath> GeneratedFiles => new[] { ConfigurationFile };
     protected virtual AbsolutePath ConfigurationDirectory => Build.RootDirectory;
-    private string ConfigurationFileName => _suffix != null ? $"azure-pipelines.{_suffix}.yml" : "azure-pipelines.yml";
+    private string ConfigurationFileName => suffix != null ? $"azure-pipelines.{suffix}.yml" : "azure-pipelines.yml";
 
     public override IEnumerable<string> RelevantTargetNames => InvokedTargets;
 
@@ -57,31 +57,31 @@ public class AzurePipelinesAttribute : ChainedConfigurationAttributeBase
 
     public bool Submodules
     {
-        set => _submodules = value;
+        set => submodules = value;
         get => throw new NotSupportedException();
     }
 
     public int FetchDepth
     {
-        set => _fetchDepth = value;
+        set => fetchDepth = value;
         get => throw new NotSupportedException();
     }
 
     public bool Clean
     {
-        set => _clean = value;
+        set => clean = value;
         get => throw new NotSupportedException();
     }
 
     public bool LargeFileStorage
     {
-        set => _largeFileStorage = value;
+        set => largeFileStorage = value;
         get => throw new NotSupportedException();
     }
 
     public bool TriggerBatch
     {
-        set => _triggerBatch = value;
+        set => triggerBatch = value;
         get => throw new NotSupportedException();
     }
 
@@ -96,7 +96,7 @@ public class AzurePipelinesAttribute : ChainedConfigurationAttributeBase
 
     public bool? PullRequestsAutoCancel
     {
-        set => _pullRequestsAutoCancel = value;
+        set => pullRequestsAutoCancel = value;
         get => throw new NotSupportedException();
     }
 
@@ -124,14 +124,14 @@ public class AzurePipelinesAttribute : ChainedConfigurationAttributeBase
                    VariableGroups = ImportVariableGroups,
                    VcsPushTrigger = GetVcsPushTrigger(),
                    VcsPullRequestTrigger = GetVcsPullRequestTrigger(),
-                   Stages = _images.Select(x => GetStage(x, relevantTargets)).ToArray()
+                   Stages = images.Select(x => GetStage(x, relevantTargets)).ToArray()
                };
     }
 
     protected AzurePipelinesVcsPushTrigger GetVcsPushTrigger()
     {
         if (!TriggerDisabled &&
-            _triggerBatch == null &&
+            triggerBatch == null &&
             TriggerBranchesInclude.Length == 0 &&
             TriggerBranchesExclude.Length == 0 &&
             TriggerTagsInclude.Length == 0 &&
@@ -143,7 +143,7 @@ public class AzurePipelinesAttribute : ChainedConfigurationAttributeBase
         return new AzurePipelinesVcsPushTrigger
                {
                    Disabled = TriggerDisabled,
-                   Batch = _triggerBatch,
+                   Batch = triggerBatch,
                    BranchesInclude = TriggerBranchesInclude,
                    BranchesExclude = TriggerBranchesExclude,
                    TagsInclude = TriggerTagsInclude,
@@ -156,7 +156,7 @@ public class AzurePipelinesAttribute : ChainedConfigurationAttributeBase
     protected AzurePipelinesVcsPushTrigger GetVcsPullRequestTrigger()
     {
         if (!PullRequestsDisabled &&
-            _pullRequestsAutoCancel == null &&
+            pullRequestsAutoCancel == null &&
             PullRequestsBranchesInclude.Length == 0 &&
             PullRequestsBranchesExclude.Length == 0 &&
             PullRequestsPathsInclude.Length == 0 &&
@@ -166,7 +166,7 @@ public class AzurePipelinesAttribute : ChainedConfigurationAttributeBase
         return new AzurePipelinesVcsPushTrigger
                {
                    Disabled = PullRequestsDisabled,
-                   AutoCancel = _pullRequestsAutoCancel,
+                   AutoCancel = pullRequestsAutoCancel,
                    BranchesInclude = PullRequestsBranchesInclude,
                    BranchesExclude = PullRequestsBranchesExclude,
                    TagsInclude = new string[0],
@@ -219,14 +219,14 @@ public class AzurePipelinesAttribute : ChainedConfigurationAttributeBase
         IReadOnlyCollection<ExecutableTarget> relevantTargets,
         AzurePipelinesImage image)
     {
-        if (_submodules.HasValue || _largeFileStorage.HasValue || _fetchDepth.HasValue || _clean.HasValue)
+        if (submodules.HasValue || largeFileStorage.HasValue || fetchDepth.HasValue || clean.HasValue)
         {
             yield return new AzurePipelineCheckoutStep
                          {
-                             InclueSubmodules = _submodules,
-                             IncludeLargeFileStorage = _largeFileStorage,
-                             FetchDepth = _fetchDepth,
-                             Clean = _clean
+                             InclueSubmodules = submodules,
+                             IncludeLargeFileStorage = largeFileStorage,
+                             FetchDepth = fetchDepth,
+                             Clean = clean
                          };
         }
 

@@ -36,15 +36,15 @@ public class DelegateDisposable : IDisposable
         return new DelegateDisposable(() => member.SetValue(target, previousValue));
     }
 
-    private readonly Action _cleanup;
+    private readonly Action cleanup;
 
     private DelegateDisposable(Action cleanup)
     {
-        _cleanup = cleanup;
+        this.cleanup = cleanup;
     }
 
     public void Dispose()
     {
-        _cleanup?.Invoke();
+        cleanup?.Invoke();
     }
 }

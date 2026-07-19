@@ -10,10 +10,10 @@ namespace Fallout.Common.ValueInjection;
 
 internal static class ValueInjectionUtility
 {
-    private static readonly Dictionary<MemberInfo, object> s_valueCache = new();
+    private static readonly Dictionary<MemberInfo, object> valueCache = new();
 
     /// <summary>Clears the per-run injected-value cache so a subsequent build in the same process re-injects. FT-1 / #306.</summary>
-    internal static void ClearCache() => s_valueCache.Clear();
+    internal static void ClearCache() => valueCache.Clear();
 
     public static T TryGetValue<T>(Expression<Func<T>> parameterExpression)
         where T : class
@@ -38,7 +38,7 @@ internal static class ValueInjectionUtility
             return attribute.TryGetValue(parameter, instance);
         }
 
-        return (T) (s_valueCache[parameter] = s_valueCache.GetValueOrDefault(parameter) ?? GetValue());
+        return (T) (valueCache[parameter] = valueCache.GetValueOrDefault(parameter) ?? GetValue());
     }
 
     public static void InjectValues<T>(T instance = default, Func<MemberInfo, Attribute, bool> filter = null)

@@ -34,8 +34,8 @@ public partial class AppVeyor : Host, IBuildServer
 
     internal static bool IsRunningAppVeyor => EnvironmentInfo.HasVariable("APPVEYOR");
 
-    private readonly Lazy<Tool> _cli = Lazy.Create(() => IsRunningAppVeyor ? ToolResolver.GetEnvironmentOrPathTool("appveyor") : null);
-    private int _messageCount;
+    private readonly Lazy<Tool> cli = Lazy.Create(() => IsRunningAppVeyor ? ToolResolver.GetEnvironmentOrPathTool("appveyor") : null);
+    private int messageCount;
 
     internal AppVeyor()
     {
@@ -44,7 +44,7 @@ public partial class AppVeyor : Host, IBuildServer
     string IBuildServer.Branch => RepositoryBranch;
     string IBuildServer.Commit => RepositoryCommitSha;
 
-    public Tool Cli => _cli.Value;
+    public Tool Cli => cli.Value;
 
     public string Url => EnvironmentInfo.GetVariable("APPVEYOR_URL");
     public string ApiUrl => EnvironmentInfo.GetVariable("APPVEYOR_API_URL");
@@ -112,7 +112,7 @@ public partial class AppVeyor : Host, IBuildServer
 
     private void WriteMessage(AppVeyorMessageCategory category, string message, string details)
     {
-        if (_messageCount == MessageLimit)
+        if (messageCount == MessageLimit)
         {
             Theme.WriteWarning(
                 $"AppVeyor has a default limit of {MessageLimit} messages. " +
@@ -120,7 +120,7 @@ public partial class AppVeyor : Host, IBuildServer
                 "contact https://appveyor.com/support to resolve this issue for your account.");
         }
 
-        _messageCount++;
+        messageCount++;
         Cli?.Invoke($"AddMessage {message.DoubleQuote()} -Category {category} -Details {details.DoubleQuote()}",
             logInvocation: false,
             logOutput: false);

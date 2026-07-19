@@ -18,7 +18,7 @@ public partial class AzurePipelines : Host, IBuildServer
 
     internal static bool IsRunningAzurePipelines => EnvironmentInfo.HasVariable("TF_BUILD");
 
-    private readonly Action<string> _messageSink;
+    private readonly Action<string> messageSink;
 
     internal AzurePipelines()
         : this(messageSink: null)
@@ -27,7 +27,7 @@ public partial class AzurePipelines : Host, IBuildServer
 
     internal AzurePipelines(Action<string> messageSink)
     {
-        _messageSink = messageSink ?? Console.WriteLine;
+        this.messageSink = messageSink ?? Console.WriteLine;
     }
 
     string IBuildServer.Branch => SourceBranch;
@@ -89,12 +89,12 @@ public partial class AzurePipelines : Host, IBuildServer
 
     public void Group(string group)
     {
-        _messageSink($"##[group]{group}");
+        messageSink($"##[group]{group}");
     }
 
     public void EndGroup(string group)
     {
-        _messageSink($"##[endgroup]{group}");
+        messageSink($"##[endgroup]{group}");
     }
 
     public void UploadLog(string path)
@@ -237,7 +237,7 @@ public partial class AzurePipelines : Host, IBuildServer
 
     private void Write(string command, string[] escapedTokens, string message)
     {
-        _messageSink.Invoke($"##vso[{command} {escapedTokens.JoinSemicolon()}]{EscapeMessage(message)}");
+        messageSink.Invoke($"##vso[{command} {escapedTokens.JoinSemicolon()}]{EscapeMessage(message)}");
     }
 
     private string EscapeMessage(string data)

@@ -73,9 +73,7 @@ dotnet_naming_style.pascal_case_style.capitalization = pascal_case
 # name private fields (instance and static) using camelCase, with no _ / m_ / g_ / s_ prefix
 # CSharpGuidelines AV1702 (camelCase private fields) + AV1705 (no field prefixes).
 # Ordered after constant_fields so private const still resolves to PascalCase above.
-# Severity is suggestion for now: the repo still carries ~100 s_-prefixed fields, so a
-# warning/error flip is gated on the one-time migration sweep (see PR description).
-dotnet_naming_rule.private_fields_should_be_camel_case.severity = suggestion
+dotnet_naming_rule.private_fields_should_be_camel_case.severity = warning
 dotnet_naming_rule.private_fields_should_be_camel_case.symbols  = private_fields
 dotnet_naming_rule.private_fields_should_be_camel_case.style    = camel_case_style
 
@@ -175,3 +173,6 @@ resharper_redundant_anonymous_type_property_name_highlighting = none
 # read this key, so a silent severity stops either from flagging build scripts.
 [build/**.cs]
 dotnet_style_require_accessibility_modifiers = omit_if_default:silent
+
+[tests/**/*.cs]
+dotnet_naming_rule.private_fields_should_be_camel_case.severity = suggestion

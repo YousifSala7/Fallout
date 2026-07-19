@@ -16,11 +16,11 @@ public static partial class EnumerableExtensions
 
     private class DelegateEqualityComparer<TSource, TValue> : IEqualityComparer<TSource>
     {
-        private readonly Func<TSource, TValue> _selector;
+        private readonly Func<TSource, TValue> selector;
 
         public DelegateEqualityComparer(Func<TSource, TValue> selector)
         {
-            _selector = selector;
+            this.selector = selector;
         }
 
         public bool Equals(TSource x, TSource y)
@@ -33,12 +33,12 @@ public static partial class EnumerableExtensions
                 return false;
             if (x.GetType() != y.GetType())
                 return false;
-            return Equals(_selector(x), _selector(y));
+            return Equals(selector(x), selector(y));
         }
 
         public int GetHashCode(TSource obj)
         {
-            return _selector(obj).GetHashCode();
+            return selector(obj).GetHashCode();
         }
     }
 }

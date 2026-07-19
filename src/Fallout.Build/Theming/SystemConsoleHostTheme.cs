@@ -30,46 +30,46 @@ public class SystemConsoleHostTheme : SystemConsoleTheme, IHostTheme
             [ConsoleThemeStyle.LevelFatal] = new() { Foreground = ConsoleColor.White, Background = ConsoleColor.Red }
         });
 
-    private readonly SystemConsoleThemeStyle _successStyle;
-    private readonly IReadOnlyDictionary<ConsoleThemeStyle, SystemConsoleThemeStyle> _styles;
+    private readonly SystemConsoleThemeStyle successStyle;
+    private readonly IReadOnlyDictionary<ConsoleThemeStyle, SystemConsoleThemeStyle> styles;
 
     public SystemConsoleHostTheme(
         SystemConsoleThemeStyle successStyle,
         IReadOnlyDictionary<ConsoleThemeStyle, SystemConsoleThemeStyle> styles)
         : base(styles)
     {
-        _successStyle = successStyle;
-        _styles = styles;
+        this.successStyle = successStyle;
+        this.styles = styles;
     }
 
     public void WriteSuccess(string text)
     {
-        Write(text, _successStyle);
+        Write(text, successStyle);
     }
 
     public void WriteVerbose(string text = null)
     {
-        Write(text, _styles[ConsoleThemeStyle.LevelVerbose]);
+        Write(text, styles[ConsoleThemeStyle.LevelVerbose]);
     }
 
     public void WriteDebug(string text)
     {
-        Write(text, _styles[ConsoleThemeStyle.LevelDebug]);
+        Write(text, styles[ConsoleThemeStyle.LevelDebug]);
     }
 
     public void WriteInformation(string text)
     {
-        Write(text, _styles[ConsoleThemeStyle.LevelInformation]);
+        Write(text, styles[ConsoleThemeStyle.LevelInformation]);
     }
 
     public void WriteWarning(string text)
     {
-        Write(text, _styles[ConsoleThemeStyle.LevelWarning]);
+        Write(text, styles[ConsoleThemeStyle.LevelWarning]);
     }
 
     public void WriteError(string text)
     {
-        Write(text, _styles[ConsoleThemeStyle.LevelError]);
+        Write(text, styles[ConsoleThemeStyle.LevelError]);
     }
 
     string IHostTheme.FormatSuccess(string text)

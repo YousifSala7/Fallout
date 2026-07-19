@@ -22,7 +22,7 @@ public partial class GitLab : Host, IBuildServer
 
     protected override string LogoDimmed => "[90m";
 
-    private readonly Action<string> _messageSink;
+    private readonly Action<string> messageSink;
 
     internal GitLab()
         : this(messageSink: null)
@@ -31,7 +31,7 @@ public partial class GitLab : Host, IBuildServer
 
     internal GitLab(Action<string> messageSink)
     {
-        _messageSink = messageSink ?? Console.WriteLine;
+        this.messageSink = messageSink ?? Console.WriteLine;
     }
 
     string IBuildServer.Branch => CommitRefName;
@@ -41,14 +41,14 @@ public partial class GitLab : Host, IBuildServer
     {
         var sectionId = GetSectionId(text);
         var unixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        _messageSink($"{SectionStartSequence}section_start:{unixTimestamp}:{sectionId}[collapsed={collapsed.ToString().ToLowerInvariant()}]{SectionResetSequence}{text}");
+        messageSink($"{SectionStartSequence}section_start:{unixTimestamp}:{sectionId}[collapsed={collapsed.ToString().ToLowerInvariant()}]{SectionResetSequence}{text}");
     }
 
     public void EndSection(string text)
     {
         var sectionId = GetSectionId(text);
         var unixTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        _messageSink($"{SectionStartSequence}section_end:{unixTimestamp}:{sectionId}{SectionResetSequence}");
+        messageSink($"{SectionStartSequence}section_end:{unixTimestamp}:{sectionId}{SectionResetSequence}");
     }
 
     private string GetSectionId(string text)

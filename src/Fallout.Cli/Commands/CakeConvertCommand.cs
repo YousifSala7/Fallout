@@ -16,10 +16,10 @@ namespace Fallout.Cli.Commands;
 /// </summary>
 internal sealed class CakeConvertCommand : IFalloutCommand
 {
-    private readonly IConsolePrompts _prompts;
-    private readonly IConfigurationReader _configuration;
-    private readonly IPackageManager _packages;
-    private readonly SetupCommand _setup;
+    private readonly IConsolePrompts prompts;
+    private readonly IConfigurationReader configuration;
+    private readonly IPackageManager packages;
+    private readonly SetupCommand setup;
 
     public CakeConvertCommand(
         IConsolePrompts prompts,
@@ -27,10 +27,10 @@ internal sealed class CakeConvertCommand : IFalloutCommand
         IPackageManager packages,
         SetupCommand setup)
     {
-        _prompts = prompts;
-        _configuration = configuration;
-        _packages = packages;
-        _setup = setup;
+        this.prompts = prompts;
+        this.configuration = configuration;
+        this.packages = packages;
+        this.setup = setup;
     }
 
     public string Name => "cake-convert";
@@ -57,19 +57,19 @@ internal sealed class CakeConvertCommand : IFalloutCommand
             }.JoinNewLine());
 
         Host.Debug();
-        if (!_prompts.PromptForConfirmation("Continue?"))
+        if (!prompts.PromptForConfirmation("Continue?"))
             return 0;
         Host.Debug();
 
         if (buildScript == null &&
-            _prompts.PromptForConfirmation("Should a NUKE project be created for better results?"))
+            prompts.PromptForConfirmation("Should a NUKE project be created for better results?"))
         {
-            await _setup.ExecuteAsync(args, rootDirectory: null, buildScript: null);
+            await setup.ExecuteAsync(args, rootDirectory: null, buildScript: null);
         }
 
         var buildScriptFile = WorkingDirectory / CliConventions.CurrentBuildScriptName;
         var buildProjectFile = buildScriptFile.Exists()
-            ? _configuration.Read(buildScriptFile, evaluate: true)
+            ? configuration.Read(buildScriptFile, evaluate: true)
                 .GetValueOrDefault(ConfigurationReader.BuildProjectFileKey, defaultValue: null)
             : null;
 
@@ -84,7 +84,7 @@ internal sealed class CakeConvertCommand : IFalloutCommand
         {
             var packages = CakeConverter.GetCakeFiles().SelectMany(x => CakeConverter.GetPackages(x.ReadAllText()));
             foreach (var package in packages)
-                _packages.AddOrReplacePackage(package.Id, package.Version, package.Type, buildProjectFile);
+                this.packages.AddOrReplacePackage(package.Id, package.Version, package.Type, buildProjectFile);
         }
 
         return 0;

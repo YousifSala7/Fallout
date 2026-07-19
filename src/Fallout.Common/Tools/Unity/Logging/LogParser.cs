@@ -6,12 +6,12 @@ namespace Fallout.Common.Tools.Unity.Logging;
 
 internal class LogParser
 {
-    private readonly Stack<MatchedBlock> _blockStack;
-    private readonly Action<string, LogLevel> _logLineAction;
-    private readonly Action<MatchedBlock> _logBlockStartAction;
-    private readonly Action<MatchedBlock> _logBlockEndAction;
+    private readonly Stack<MatchedBlock> blockStack;
+    private readonly Action<string, LogLevel> logLineAction;
+    private readonly Action<MatchedBlock> logBlockStartAction;
+    private readonly Action<MatchedBlock> logBlockEndAction;
 
-    private readonly IReadOnlyList<BlockMatcher> _blockMatchers =
+    private readonly IReadOnlyList<BlockMatcher> blockMatchers =
         new[]
         {
             new BlockMatcher("Player statistics", "\\*\\*\\*Player size statistics\\*\\*\\*", "Unloading.*", endMatchType: MatchType.Exclusive),
@@ -21,7 +21,7 @@ internal class LogParser
             new BlockMatcher("Prepare Build", "---- PrepareBuild Start ----", "---- PrepareBuild End ----")
         };
 
-    private readonly IReadOnlyList<LineMatcher> _lineMatchers =
+    private readonly IReadOnlyList<LineMatcher> lineMatchers =
         new[]
         {
             // Warnings
@@ -43,18 +43,18 @@ internal class LogParser
         Action<MatchedBlock> logBlockStartAction,
         Action<MatchedBlock> logBlockEndAction)
     {
-        _logLineAction = logLineAction ?? throw new ArgumentNullException(nameof(logLineAction));
-        _logBlockStartAction = logBlockStartAction ?? throw new ArgumentNullException(nameof(logBlockStartAction));
-        _logBlockEndAction = logBlockEndAction ?? throw new ArgumentNullException(nameof(logBlockEndAction));
+        this.logLineAction = logLineAction ?? throw new ArgumentNullException(nameof(logLineAction));
+        this.logBlockStartAction = logBlockStartAction ?? throw new ArgumentNullException(nameof(logBlockStartAction));
+        this.logBlockEndAction = logBlockEndAction ?? throw new ArgumentNullException(nameof(logBlockEndAction));
 
-        _blockStack = new Stack<MatchedBlock>();
+        blockStack = new Stack<MatchedBlock>();
     }
 
     public void Log(string message)
     {
-        if (_blockStack.Count != 0)
+        if (blockStack.Count != 0)
         {
-            var match = _blockStack.Peek().MatchesEnd(message);
+            var match = blockStack.Peek().MatchesEnd(message);
             switch (match)
             {
                 case MatchType.Inclusive:
@@ -67,7 +67,7 @@ internal class LogParser
             }
         }
 
-        var block = _blockMatchers.Select(x => x.MatchesBeginning(message)).FirstOrDefault(x => x != null);
+        var block = blockMatchers.Select(x => x.MatchesBeginning(message)).FirstOrDefault(x => x != null);
 
         if (block != null)
         {
@@ -88,25 +88,25 @@ internal class LogParser
 
     private void LogBlockStart(MatchedBlock block)
     {
-        _blockStack.Push(block);
-        _logBlockStartAction(block);
+        blockStack.Push(block);
+        logBlockStartAction(block);
     }
 
     private void LogLine(string message)
     {
-        var line = _lineMatchers.FirstOrDefault(x => x.Matches(message));
+        var line = lineMatchers.FirstOrDefault(x => x.Matches(message));
         Log(message, line?.LogLevel ?? LogLevel.Normal);
     }
 
     private void LogBlockEnd()
     {
-        var block = _blockStack.Pop();
-        _logBlockEndAction(block);
+        var block = blockStack.Pop();
+        logBlockEndAction(block);
     }
 
     private void Log(string message, LogLevel logLevel)
     {
         message = message.TrimEnd('\r', '\n');
-        _logLineAction(message, logLevel);
+        logLineAction(message, logLevel);
     }
 }

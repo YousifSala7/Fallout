@@ -27,13 +27,13 @@ internal sealed class SetupCommand : IFalloutCommand
 {
     private const string TARGET_FRAMEWORK = "net10.0";
 
-    private readonly IConsolePrompts _prompts;
-    private readonly IBuildScaffolder _scaffolder;
+    private readonly IConsolePrompts prompts;
+    private readonly IBuildScaffolder scaffolder;
 
     public SetupCommand(IConsolePrompts prompts, IBuildScaffolder scaffolder)
     {
-        _prompts = prompts;
-        _scaffolder = scaffolder;
+        this.prompts = prompts;
+        this.scaffolder = scaffolder;
     }
 
     public string Name => "setup";
@@ -63,17 +63,17 @@ internal sealed class SetupCommand : IFalloutCommand
             Host.Warning("Could not find root directory. Falling back to working directory ...");
             rootDirectory = WorkingDirectory;
         }
-        _prompts.ShowInput("deciduous_tree", "Root directory", rootDirectory);
+        prompts.ShowInput("deciduous_tree", "Root directory", rootDirectory);
 
-        var buildProjectName = _prompts.PromptForInput("How should the project be named?", "_build");
-        _prompts.ClearPreviousLine();
-        _prompts.ShowInput("bookmark", "Build project name", buildProjectName);
+        var buildProjectName = prompts.PromptForInput("How should the project be named?", "_build");
+        prompts.ClearPreviousLine();
+        prompts.ShowInput("bookmark", "Build project name", buildProjectName);
 
-        var buildProjectRelativeDirectory = _prompts.PromptForInput("Where should the project be located?", "./build");
-        _prompts.ClearPreviousLine();
-        _prompts.ShowInput("round_pushpin", "Build project location", buildProjectRelativeDirectory);
+        var buildProjectRelativeDirectory = prompts.PromptForInput("Where should the project be located?", "./build");
+        prompts.ClearPreviousLine();
+        prompts.ShowInput("round_pushpin", "Build project location", buildProjectRelativeDirectory);
 
-        var falloutVersion = _prompts.PromptForChoice("Which Fallout.Common version should be used?",
+        var falloutVersion = prompts.PromptForChoice("Which Fallout.Common version should be used?",
             new[]
                 {
                     ("latest release", await falloutLatestReleaseVersion),
@@ -84,9 +84,9 @@ internal sealed class SetupCommand : IFalloutCommand
                 .Where(x => x.Item2 != null)
                 .Distinct(x => x.Item2)
                 .Select(x => (x.Item2, $"{x.Item2} ({x.Item1})")).ToArray());
-        _prompts.ShowInput("gem_stone", "Fallout.Common version", falloutVersion);
+        prompts.ShowInput("gem_stone", "Fallout.Common version", falloutVersion);
 
-        var solutionFile = (AbsolutePath) _prompts.PromptForChoice(
+        var solutionFile = (AbsolutePath) prompts.PromptForChoice(
             "Which solution should be the default?",
             choices: new DirectoryInfo(rootDirectory)
                 .EnumerateFiles("*", SearchOption.AllDirectories)
@@ -94,7 +94,7 @@ internal sealed class SetupCommand : IFalloutCommand
                 .OrderByDescending(x => x.FullName)
                 .Select(x => (x, rootDirectory.GetRelativePathTo(x.FullName).ToString()))
                 .Concat((null, "None")).ToArray())?.FullName;
-        _prompts.ShowInput("toolbox", "Default solution", solutionFile != null ? rootDirectory.GetRelativePathTo(solutionFile) : "<none>");
+        prompts.ShowInput("toolbox", "Default solution", solutionFile != null ? rootDirectory.GetRelativePathTo(solutionFile) : "<none>");
 
         #endregion
 
@@ -106,11 +106,11 @@ internal sealed class SetupCommand : IFalloutCommand
 
         (rootDirectory / FalloutDirectoryName).CreateDirectory();
 
-        _scaffolder.WriteBuildScripts(
+        scaffolder.WriteBuildScripts(
             scriptDirectory: WorkingDirectory,
             rootDirectory);
 
-        _scaffolder.WriteConfigurationFile(rootDirectory, solutionFile);
+        scaffolder.WriteConfigurationFile(rootDirectory, solutionFile);
 
         if (solutionFile != null)
         {
@@ -118,7 +118,7 @@ internal sealed class SetupCommand : IFalloutCommand
             if (solutionFile.Extension.EqualsOrdinalIgnoreCase(".slnx"))
             {
                 var solutionDocument = XDocument.Load(solutionFile);
-                _scaffolder.UpdateSolutionXmlFileContent(solutionDocument, buildProjectFileRelative);
+                scaffolder.UpdateSolutionXmlFileContent(solutionDocument, buildProjectFileRelative);
 
                 var settings = new XmlWriterSettings { OmitXmlDeclaration = true, Indent = true };
                 using var writer = XmlWriter.Create(solutionFile, settings);
@@ -127,14 +127,14 @@ internal sealed class SetupCommand : IFalloutCommand
             else
             {
                 var solutionFileContent = solutionFile.ReadAllLines().ToList();
-                _scaffolder.UpdateSolutionFileContent(solutionFileContent, buildProjectFileRelative, buildProjectGuid, buildProjectName);
+                scaffolder.UpdateSolutionFileContent(solutionFileContent, buildProjectFileRelative, buildProjectGuid, buildProjectName);
                 solutionFile.WriteAllLines(solutionFileContent, Encoding.UTF8);
             }
         }
 
         buildProjectFile.WriteAllLines(
             FillTemplate(
-                _scaffolder.GetTemplate("_build.csproj"),
+                scaffolder.GetTemplate("_build.csproj"),
                 GetDictionary(
                     new
                     {
@@ -145,14 +145,14 @@ internal sealed class SetupCommand : IFalloutCommand
                         FalloutVersion = falloutVersion,
                     })));
 
-        (buildDirectory / "Directory.Build.props").WriteAllLines(_scaffolder.GetTemplate("Directory.Build.props"));
-        (buildDirectory / "Directory.Build.targets").WriteAllLines(_scaffolder.GetTemplate("Directory.Build.targets"));
-        (buildDirectory / "Build.cs").WriteAllLines(FillTemplate(_scaffolder.GetTemplate("Build.cs")));
-        (buildDirectory / "Configuration.cs").WriteAllLines(_scaffolder.GetTemplate("Configuration.cs"));
+        (buildDirectory / "Directory.Build.props").WriteAllLines(scaffolder.GetTemplate("Directory.Build.props"));
+        (buildDirectory / "Directory.Build.targets").WriteAllLines(scaffolder.GetTemplate("Directory.Build.targets"));
+        (buildDirectory / "Build.cs").WriteAllLines(FillTemplate(scaffolder.GetTemplate("Build.cs")));
+        (buildDirectory / "Configuration.cs").WriteAllLines(scaffolder.GetTemplate("Configuration.cs"));
 
         #endregion
 
-        _prompts.ShowCompletion("Setup");
+        prompts.ShowCompletion("Setup");
 
         return 0;
     }

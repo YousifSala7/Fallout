@@ -189,19 +189,19 @@ public partial class Host
 
     internal class LogEventSink : ILogEventSink
     {
-        private readonly Host _host;
+        private readonly Host host;
 
         public LogEventSink(Host host)
         {
-            _host = host;
+            this.host = host;
         }
 
         public void Emit(LogEvent logEvent)
         {
             if (logEvent.Level is LogEventLevel.Warning)
-                _host.ReportWarning(logEvent.RenderMessage(), logEvent.Exception?.ToString());
+                host.ReportWarning(logEvent.RenderMessage(), logEvent.Exception?.ToString());
             else if (logEvent.Level is LogEventLevel.Error or LogEventLevel.Fatal)
-                _host.ReportError(logEvent.RenderMessage(), logEvent.Exception?.ToString());
+                host.ReportError(logEvent.RenderMessage(), logEvent.Exception?.ToString());
         }
     }
 }

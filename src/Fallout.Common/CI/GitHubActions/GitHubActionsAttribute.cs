@@ -19,27 +19,27 @@ namespace Fallout.Common.CI.GitHubActions;
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class GitHubActionsAttribute : ConfigurationAttributeBase
 {
-    private readonly string _name;
-    private readonly GitHubActionsImage[] _images;
-    private GitHubActionsSubmodules? _submodules;
-    private bool? _lfs;
-    private uint? _fetchDepth;
-    private bool? _progress;
-    private string _filter;
-    private string _ref;
+    private readonly string name;
+    private readonly GitHubActionsImage[] images;
+    private GitHubActionsSubmodules? submodules;
+    private bool? lfs;
+    private uint? fetchDepth;
+    private bool? progress;
+    private string filter;
+    private string reference;
 
     public GitHubActionsAttribute(
         string name,
         GitHubActionsImage image,
         params GitHubActionsImage[] images)
     {
-        _name = NormalizeWorkflowName(name);
-        _images = new[] { image }.Concat(images).ToArray();
+        this.name = NormalizeWorkflowName(name);
+        this.images = new[] { image }.Concat(images).ToArray();
     }
 
-    public override string IdPostfix => _name;
+    public override string IdPostfix => name;
     public override Type HostType => typeof(GitHubActions);
-    public override AbsolutePath ConfigurationFile => Build.RootDirectory / ".github" / "workflows" / $"{_name}.yml";
+    public override AbsolutePath ConfigurationFile => Build.RootDirectory / ".github" / "workflows" / $"{name}.yml";
     public override IEnumerable<AbsolutePath> GeneratedFiles => new[] { ConfigurationFile };
 
     public override IEnumerable<string> RelevantTargetNames => InvokedTargets;
@@ -122,31 +122,31 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
 
     public GitHubActionsSubmodules Submodules
     {
-        set => _submodules = value;
+        set => submodules = value;
         get => throw new NotSupportedException();
     }
 
     public bool Lfs
     {
-        set => _lfs = value;
+        set => lfs = value;
         get => throw new NotSupportedException();
     }
 
     public uint FetchDepth
     {
-        set => _fetchDepth = value;
+        set => fetchDepth = value;
         get => throw new NotSupportedException();
     }
 
     public bool Progress
     {
-        set => _progress = value;
+        set => progress = value;
         get => throw new NotSupportedException();
     }
 
     public string Filter
     {
-        set => _filter = value;
+        set => filter = value;
         get => throw new NotSupportedException();
     }
 
@@ -162,7 +162,7 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
     /// </summary>
     public string CheckoutRef
     {
-        set => _ref = value;
+        set => reference = value;
         get => throw new NotSupportedException();
     }
 
@@ -203,7 +203,7 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
 
         var configuration = new GitHubActionsConfiguration
                             {
-                                Name = _name,
+                                Name = name,
                                 ShortTriggers = On,
                                 DetailedTriggers = GetTriggers().ToArray(),
                                 Env = Env,
@@ -212,14 +212,14 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
                                 ConcurrencyGroup = ConcurrencyGroup,
                                 ConcurrencyCancelInProgress = ConcurrencyCancelInProgress,
                                 DefaultShell = DefaultShell,
-                                Jobs = _images.Select(x => GetJobs(x, relevantTargets)).ToArray()
+                                Jobs = images.Select(x => GetJobs(x, relevantTargets)).ToArray()
                             };
 
         Assert.True(configuration.ShortTriggers.Length == 0 || configuration.DetailedTriggers.Length == 0,
             $"Workflows can only define either shorthand '{nameof(On)}' or '{nameof(On)}*' triggers");
         Assert.True(configuration.ShortTriggers.Length > 0 || configuration.DetailedTriggers.Length > 0,
             $"Workflows must define either shorthand '{nameof(On)}' or '{nameof(On)}*' triggers");
-        Assert.True(RunsOnLabels.Length == 0 || _images.Length == 1,
+        Assert.True(RunsOnLabels.Length == 0 || images.Length == 1,
             $"Cannot use '{nameof(RunsOnLabels)}' with multiple images; labels resolve a single job's runner");
         Assert.True(RunsOnLabels.All(x => !x.IsNullOrWhiteSpace()),
             $"'{nameof(RunsOnLabels)}' entries must not be null, empty, or whitespace");
@@ -247,12 +247,12 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
     {
         var checkout = new GitHubActionsCheckoutStep
                        {
-                           Submodules = _submodules,
-                           Lfs = _lfs,
-                           FetchDepth = _fetchDepth,
-                           Progress = _progress,
-                           Filter = _filter,
-                           Ref = _ref,
+                           Submodules = submodules,
+                           Lfs = lfs,
+                           FetchDepth = fetchDepth,
+                           Progress = progress,
+                           Filter = filter,
+                           Ref = reference,
                            CheckoutWith = CheckoutWith
                        };
 
@@ -296,7 +296,7 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
         builtInSteps.Add(run);
         builtInSteps.AddRange(artifacts);
 
-        var pipeline = new GitHubActionsStepPipeline(_name, image, builtInSteps.AsReadOnly());
+        var pipeline = new GitHubActionsStepPipeline(name, image, builtInSteps.AsReadOnly());
         if (Build is IConfigureGitHubActions configure)
             configure.ConfigureSteps(pipeline);
         ValidateCustomSteps(pipeline);
@@ -322,11 +322,11 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
             var hasRun = step.Run is { } run && run.Any(x => !x.IsNullOrWhiteSpace());
 
             Assert.True(hasUses ^ hasRun,
-                $"Custom step '{id}' in workflow '{_name}' must set exactly one of '{nameof(GitHubActionsCustomStep.Uses)}' or '{nameof(GitHubActionsCustomStep.Run)}'");
+                $"Custom step '{id}' in workflow '{name}' must set exactly one of '{nameof(GitHubActionsCustomStep.Uses)}' or '{nameof(GitHubActionsCustomStep.Run)}'");
             Assert.True((step.With?.Count ?? 0) == 0 || hasUses,
-                $"Custom step '{id}' in workflow '{_name}' sets '{nameof(GitHubActionsCustomStep.With)}' but no '{nameof(GitHubActionsCustomStep.Uses)}'; 'with:' is only valid on a 'uses:' step");
+                $"Custom step '{id}' in workflow '{name}' sets '{nameof(GitHubActionsCustomStep.With)}' but no '{nameof(GitHubActionsCustomStep.Uses)}'; 'with:' is only valid on a 'uses:' step");
             Assert.True(step.Shell.IsNullOrWhiteSpace() || !hasUses,
-                $"Custom step '{id}' in workflow '{_name}' sets '{nameof(GitHubActionsCustomStep.Shell)}' on a 'uses:' step; shell applies only to run steps");
+                $"Custom step '{id}' in workflow '{name}' sets '{nameof(GitHubActionsCustomStep.Shell)}' on a 'uses:' step; shell applies only to run steps");
         }
     }
 
@@ -418,7 +418,7 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
 #pragma warning restore FALLOUTOBS001
 
         foreach (var input in DeclaredInputs.Where(x => x.Workflows.Length == 0 ||
-                     x.Workflows.Select(NormalizeWorkflowName).Contains(_name)))
+                     x.Workflows.Select(NormalizeWorkflowName).Contains(name)))
             yield return new GitHubActionsWorkflowDispatchInput
                          {
                              Name = input.Name,
@@ -464,10 +464,10 @@ public class GitHubActionsAttribute : ConfigurationAttributeBase
         var inputs = GetWorkflowDispatchInputs().ToList();
         foreach (var input in inputs)
             Assert.True(!input.Name.IsNullOrWhiteSpace(),
-                $"workflow_dispatch input names must be non-empty in workflow '{_name}'");
+                $"workflow_dispatch input names must be non-empty in workflow '{name}'");
 
         var names = inputs.Select(x => x.Name).ToList();
         Assert.True(names.Count == names.Distinct().Count(),
-            $"Duplicate workflow_dispatch input names in workflow '{_name}'");
+            $"Duplicate workflow_dispatch input names in workflow '{name}'");
     }
 }

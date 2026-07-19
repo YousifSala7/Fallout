@@ -21,7 +21,7 @@ internal partial class Telemetry
 
     public static void TargetSucceeded(ExecutableTarget target, IFalloutBuild build)
     {
-        if (!target.Name.EqualsAnyOrdinalIgnoreCase(s_knownTargets) ||
+        if (!target.Name.EqualsAnyOrdinalIgnoreCase(knownTargets) ||
             target.Status != ExecutionStatus.Succeeded)
             return;
 

@@ -12,17 +12,17 @@ namespace Fallout.Common.CI.SpaceAutomation;
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class SpaceAutomationAttribute : ConfigurationAttributeBase
 {
-    private readonly string _name;
-    private readonly string _image;
+    private readonly string name;
+    private readonly string image;
 
-    private bool _submodules;
-    private bool? _onPush;
-    private int? _timeoutInMinutes;
+    private bool submodules;
+    private bool? onPush;
+    private int? timeoutInMinutes;
 
     public SpaceAutomationAttribute(string name, string image)
     {
-        _name = name;
-        _image = image;
+        this.name = name;
+        this.image = image;
     }
 
     public override Type HostType => typeof(SpaceAutomation);
@@ -39,7 +39,7 @@ public class SpaceAutomationAttribute : ConfigurationAttributeBase
 
     public bool Submodules
     {
-        set => _submodules = value;
+        set => submodules = value;
         get => throw new NotSupportedException();
     }
 
@@ -47,7 +47,7 @@ public class SpaceAutomationAttribute : ConfigurationAttributeBase
 
     public bool OnPush
     {
-        set => _onPush = value;
+        set => onPush = value;
         get => throw new NotSupportedException();
     }
 
@@ -63,7 +63,7 @@ public class SpaceAutomationAttribute : ConfigurationAttributeBase
 
     public int TimeoutInMinutes
     {
-        set => _timeoutInMinutes = value;
+        set => timeoutInMinutes = value;
         get => throw new NotSupportedException();
     }
 
@@ -76,12 +76,12 @@ public class SpaceAutomationAttribute : ConfigurationAttributeBase
     {
         return new SpaceAutomationConfiguration
                {
-                   Name = _name,
+                   Name = name,
                    VolumeSize = VolumeSize,
                    RefSpec = RefSpec,
                    Container = GetContainer(),
                    Triggers = GetTriggers().ToArray(),
-                   TimeoutInMinutes = _timeoutInMinutes
+                   TimeoutInMinutes = timeoutInMinutes
                };
     }
 
@@ -89,10 +89,10 @@ public class SpaceAutomationAttribute : ConfigurationAttributeBase
     {
         return new SpaceAutomationContainer
                {
-                   Image = _image,
+                   Image = image,
                    Resources = GetResources(),
                    Imports = GetImports().ToDictionary(x => x.Key, x => x.Value),
-                   Submodules = _submodules,
+                   Submodules = submodules,
                    BuildScript = BuildCmdPath.Replace(".cmd", ".sh"),
                    InvokedTargets = InvokedTargets
                };
@@ -114,7 +114,7 @@ public class SpaceAutomationAttribute : ConfigurationAttributeBase
 
     protected virtual IEnumerable<SpaceAutomationTrigger> GetTriggers()
     {
-        if (_onPush != null ||
+        if (onPush != null ||
             OnPushBranchIncludes != null ||
             OnPushBranchExcludes != null ||
             OnPushBranchRegexIncludes != null ||
@@ -124,7 +124,7 @@ public class SpaceAutomationAttribute : ConfigurationAttributeBase
         {
             yield return new SpaceAutomationPushTrigger
                          {
-                             OnPush = _onPush,
+                             OnPush = onPush,
                              OnPushBranchIncludes = OnPushBranchIncludes,
                              OnPushBranchExcludes = OnPushBranchExcludes,
                              OnPushBranchRegexIncludes = OnPushBranchRegexIncludes,

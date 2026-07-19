@@ -19,11 +19,11 @@ public static partial class StringExtensions
         return Regex.Replace(str, pattern, matchEvaluator, options);
     }
 
-    private static readonly Regex s_unicodeRegex = new(@"\\u(?<Value>[a-zA-Z0-9]{4})", RegexOptions.Compiled);
+    private static readonly Regex unicodeRegex = new(@"\\u(?<Value>[a-zA-Z0-9]{4})", RegexOptions.Compiled);
 
     public static string ReplaceUnicode(this string str)
     {
-        return s_unicodeRegex.Replace(str, m => ((char) int.Parse(m.Groups["Value"].Value, NumberStyles.HexNumber)).ToString());
+        return unicodeRegex.Replace(str, m => ((char) int.Parse(m.Groups["Value"].Value, NumberStyles.HexNumber)).ToString());
     }
 
     public static string ReplaceKnownWords(this string str)

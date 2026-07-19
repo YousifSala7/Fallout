@@ -213,25 +213,25 @@ public static class Logging
     {
         public static InMemorySink Instance { get; } = new();
 
-        private readonly List<LogEvent> _logEvents;
+        private readonly List<LogEvent> logEvents;
 
         private InMemorySink()
         {
-            _logEvents = new List<LogEvent>();
+            logEvents = new List<LogEvent>();
         }
 
-        public IReadOnlyCollection<LogEvent> LogEvents => _logEvents.AsReadOnly();
+        public IReadOnlyCollection<LogEvent> LogEvents => logEvents.AsReadOnly();
 
         public void Emit(LogEvent logEvent)
         {
             logEvent.AddOrUpdateProperty(ExecutingTargetLogEventEnricher.Current);
-            _logEvents.Add(logEvent);
+            logEvents.Add(logEvent);
         }
 
         /// <summary>Drops accumulated events so a subsequent build in the same process starts clean. FT-1 / #306.</summary>
         public void Clear()
         {
-            _logEvents.Clear();
+            logEvents.Clear();
         }
 
         public void Dispose()
@@ -242,16 +242,16 @@ public static class Logging
 
     internal class ExecutingTargetLogEventEnricher : ILogEventEnricher
     {
-        public static LogEventProperty Current => s_property ?? s_defaultProperty;
+        public static LogEventProperty Current => property ?? defaultProperty;
 
-        private static readonly LogEventProperty s_defaultProperty = GetTargetEventProperty(string.Empty);
+        private static readonly LogEventProperty defaultProperty = GetTargetEventProperty(string.Empty);
 #pragma warning disable CS0649
-        private static LogEventProperty s_property;
+        private static LogEventProperty property;
 #pragma warning restore CS0649
 
         public static IDisposable SetTargetEventProperty(string name)
         {
-            return DelegateDisposable.SetAndRestore(() => s_property, GetTargetEventProperty(name));
+            return DelegateDisposable.SetAndRestore(() => property, GetTargetEventProperty(name));
         }
 
         private static LogEventProperty GetTargetEventProperty(string name)

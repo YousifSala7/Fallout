@@ -16,13 +16,13 @@ namespace Fallout.CodeGeneration;
 
 public static class ToolSerializer
 {
-    private static readonly JsonSerializerOptions s_readOptions = new()
+    private static readonly JsonSerializerOptions readOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true,
     };
 
-    private static readonly JsonSerializerOptions s_writeOptions = new()
+    private static readonly JsonSerializerOptions writeOptions = new()
     {
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -40,7 +40,7 @@ public static class ToolSerializer
         try
         {
             var content = File.ReadAllText(file);
-            return JsonSerializer.Deserialize<Tool>(content, s_readOptions);
+            return JsonSerializer.Deserialize<Tool>(content, readOptions);
         }
         catch (Exception exception)
         {
@@ -52,7 +52,7 @@ public static class ToolSerializer
 
     public static void Save(Tool tool, AbsolutePath file)
     {
-        file.WriteAllText(JsonSerializer.Serialize(tool, s_writeOptions));
+        file.WriteAllText(JsonSerializer.Serialize(tool, writeOptions));
     }
 
     // Mirrors the legacy Newtonsoft CustomContractResolver. Two-pass shape:

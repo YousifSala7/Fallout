@@ -19,23 +19,23 @@ namespace Fallout.Common.Tools.AzureKeyVault
 
     public class AzureKeyVault
     {
-        private readonly Lazy<CertificateClient> _certificateClient;
-        private readonly Lazy<KeyClient> _keyClient;
-        private readonly Lazy<SecretClient> _secretClient;
+        private readonly Lazy<CertificateClient> certificateClient;
+        private readonly Lazy<KeyClient> keyClient;
+        private readonly Lazy<SecretClient> secretClient;
 
         internal AzureKeyVault(string tenantId, string clientId, string clientSecret, string baseUrl)
         {
             var credential = new ClientSecretCredential(tenantId, clientId, clientSecret);
             var uri = new Uri(baseUrl);
 
-            _keyClient = new Lazy<KeyClient>(() => new KeyClient(uri, credential));
-            _secretClient = new Lazy<SecretClient>(() => new SecretClient(uri, credential));
-            _certificateClient = new Lazy<CertificateClient>(() => new CertificateClient(uri, credential));
+            keyClient = new Lazy<KeyClient>(() => new KeyClient(uri, credential));
+            secretClient = new Lazy<SecretClient>(() => new SecretClient(uri, credential));
+            certificateClient = new Lazy<CertificateClient>(() => new CertificateClient(uri, credential));
         }
 
-        public CertificateClient CertificateClient => _certificateClient.Value;
-        public KeyClient KeyClient => _keyClient.Value;
-        public SecretClient SecretClient => _secretClient.Value;
+        public CertificateClient CertificateClient => certificateClient.Value;
+        public KeyClient KeyClient => keyClient.Value;
+        public SecretClient SecretClient => secretClient.Value;
 
         public async Task<AzureKeyVaultKey> GetKey(string keyName, string secretName = null)
         {

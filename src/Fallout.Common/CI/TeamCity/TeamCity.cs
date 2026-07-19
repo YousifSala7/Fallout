@@ -57,12 +57,12 @@ public partial class TeamCity : Host, IBuildServer
         }
     }
 
-    private readonly Action<string> _messageSink;
+    private readonly Action<string> messageSink;
 
-    private readonly Lazy<IReadOnlyDictionary<string, string>> _systemProperties;
-    private readonly Lazy<IReadOnlyDictionary<string, string>> _configurationProperties;
-    private readonly Lazy<IReadOnlyDictionary<string, string>> _runnerProperties;
-    private readonly Lazy<IReadOnlyCollection<string>> _recentlyFailedTests;
+    private readonly Lazy<IReadOnlyDictionary<string, string>> systemProperties;
+    private readonly Lazy<IReadOnlyDictionary<string, string>> configurationProperties;
+    private readonly Lazy<IReadOnlyDictionary<string, string>> runnerProperties;
+    private readonly Lazy<IReadOnlyCollection<string>> recentlyFailedTests;
 
     internal TeamCity()
         : this(messageSink: null)
@@ -71,12 +71,12 @@ public partial class TeamCity : Host, IBuildServer
 
     internal TeamCity(Action<string> messageSink)
     {
-        _messageSink = messageSink ?? Console.WriteLine;
+        this.messageSink = messageSink ?? Console.WriteLine;
 
-        _systemProperties = Lazy.Create(() => ParseDictionary(EnvironmentInfo.GetVariable("TEAMCITY_BUILD_PROPERTIES_FILE")));
-        _configurationProperties = Lazy.Create(() => ParseDictionary(SystemProperties?["teamcity.configuration.properties.file"]));
-        _runnerProperties = Lazy.Create(() => ParseDictionary(SystemProperties?["teamcity.runner.properties.file"]));
-        _recentlyFailedTests = Lazy.Create(() =>
+        systemProperties = Lazy.Create(() => ParseDictionary(EnvironmentInfo.GetVariable("TEAMCITY_BUILD_PROPERTIES_FILE")));
+        configurationProperties = Lazy.Create(() => ParseDictionary(SystemProperties?["teamcity.configuration.properties.file"]));
+        runnerProperties = Lazy.Create(() => ParseDictionary(SystemProperties?["teamcity.runner.properties.file"]));
+        recentlyFailedTests = Lazy.Create(() =>
         {
             var file = (AbsolutePath) SystemProperties?["teamcity.tests.recentlyFailedTests.file"];
             return file.FileExists()
@@ -88,10 +88,10 @@ public partial class TeamCity : Host, IBuildServer
     string IBuildServer.Branch => BranchName;
     string IBuildServer.Commit => BuildVcsNumber;
 
-    public IReadOnlyDictionary<string, string> ConfigurationProperties => _configurationProperties.Value;
-    public IReadOnlyDictionary<string, string> SystemProperties => _systemProperties.Value;
-    public IReadOnlyDictionary<string, string> RunnerProperties => _runnerProperties.Value;
-    public IReadOnlyCollection<string> RecentlyFailedTests => _recentlyFailedTests.Value;
+    public IReadOnlyDictionary<string, string> ConfigurationProperties => configurationProperties.Value;
+    public IReadOnlyDictionary<string, string> SystemProperties => systemProperties.Value;
+    public IReadOnlyDictionary<string, string> RunnerProperties => runnerProperties.Value;
+    public IReadOnlyCollection<string> RecentlyFailedTests => recentlyFailedTests.Value;
 
     public string BuildConfiguration => SystemProperties?["teamcity.buildConfName"];
     public string BuildTypeId => SystemProperties?["teamcity.buildType.id"];
@@ -292,7 +292,7 @@ public partial class TeamCity : Host, IBuildServer
 
     public void Write(string escapedMessage)
     {
-        _messageSink($"##teamcity[{escapedMessage}]");
+        messageSink($"##teamcity[{escapedMessage}]");
     }
 
     private string Escape(string str)

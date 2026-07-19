@@ -14,7 +14,7 @@ namespace Fallout.Common.Tools.Slack;
 
 public static class SlackTasks
 {
-    private static HttpClient s_client = new();
+    private static HttpClient client = new();
 
     public static void SendSlackMessage(Configure<SlackMessage> configurator, string webhook)
     {
@@ -26,7 +26,7 @@ public static class SlackTasks
         var message = configurator(new SlackMessage());
         var payload = JsonSerializer.Serialize(message);
 
-        var response = await s_client.CreateRequest(HttpMethod.Post, webhook)
+        var response = await client.CreateRequest(HttpMethod.Post, webhook)
             .WithFormUrlEncodedContent(new Dictionary<string, string> { ["payload"] = payload })
             .GetResponseAsync();
 
@@ -38,7 +38,7 @@ public static class SlackTasks
     {
         var message = configurator(new SlackMessage());
 
-        var response = await s_client.CreateRequest(
+        var response = await client.CreateRequest(
                 HttpMethod.Post,
                 message.Timestamp == null
                     ? "https://slack.com/api/chat.postMessage"

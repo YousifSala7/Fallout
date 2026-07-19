@@ -16,12 +16,12 @@ namespace Fallout.Common.Tools.Unity;
 partial class UnityTasks
 {
     [ThreadStatic]
-    private static FileWatcher s_watcher;
+    private static FileWatcher watcher;
 
     [ThreadStatic]
-    private static LogParser s_logParser;
+    private static LogParser logParser;
 
-    private static bool s_minimalOutput;
+    private static bool minimalOutput;
 
     protected override string GetToolPath(ToolOptions options = null)
     {
@@ -62,10 +62,10 @@ partial class UnityTasks
         var logFile = (AbsolutePath)unityOptions.LogFile ?? FalloutBuild.TemporaryDirectory / "unity.log";
         logFile.DeleteFile();
 
-        s_minimalOutput = unityOptions.MinimalOutput ?? false;
-        s_logParser = new LogParser(LogLine, LogBlockStart, LogBlockEnd);
-        s_watcher = new FileWatcher(logFile, s_logParser.Log);
-        s_watcher.Start();
+        minimalOutput = unityOptions.MinimalOutput ?? false;
+        logParser = new LogParser(LogLine, LogBlockStart, LogBlockEnd);
+        watcher = new FileWatcher(logFile, logParser.Log);
+        watcher.Start();
 
         return options;
     }
@@ -108,8 +108,8 @@ partial class UnityTasks
 
     private static void AssertWatcherStopped()
     {
-        s_watcher?.AssertStopped();
-        s_watcher = null;
+        watcher?.AssertStopped();
+        watcher = null;
     }
 
     private static void LogLine(string message, Logging.LogLevel logLevel)

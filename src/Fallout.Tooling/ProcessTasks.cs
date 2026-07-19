@@ -19,8 +19,8 @@ public static class ProcessTasks
     public static bool LogWorkingDirectory = true;
     public static string DefaultWorkingDirectory = EnvironmentInfo.WorkingDirectory;
 
-    private static readonly char[] s_pathSeparators = { EnvironmentInfo.IsWin ? ';' : ':' };
-    private static readonly object s_lock = new();
+    private static readonly char[] pathSeparators = { EnvironmentInfo.IsWin ? ';' : ':' };
+    private static readonly object syncLock = new();
 
     public static IProcess StartShell(
         string command,
@@ -168,7 +168,7 @@ public static class ProcessTasks
 
     private static void LogInvocation(ProcessStartInfo startInfo, Func<string, string> outputFilter)
     {
-        lock (s_lock)
+        lock (syncLock)
         {
             // TODO: logging additional
             Log.Information("> {ToolPath} {Arguments}", startInfo.FileName.DoubleQuoteIfNeeded(), outputFilter(startInfo.Arguments));
@@ -237,7 +237,7 @@ public static class ProcessTasks
     {
         static IEnumerable<(string Key, string Value)> Split(KeyValuePair<string, string> pair)
         {
-            var values = pair.Value.Split(s_pathSeparators, StringSplitOptions.RemoveEmptyEntries);
+            var values = pair.Value.Split(pathSeparators, StringSplitOptions.RemoveEmptyEntries);
             var padding = values.Length.ToString().Length;
 
             return values.Length == 1
@@ -256,7 +256,7 @@ public static class ProcessTasks
     {
         EnvironmentInfo.Variables
             .SingleOrDefault(x => x.Key.EqualsOrdinalIgnoreCase("path"))
-            .Value.Split(s_pathSeparators, StringSplitOptions.RemoveEmptyEntries)
+            .Value.Split(pathSeparators, StringSplitOptions.RemoveEmptyEntries)
             .Select(EnvironmentInfo.ExpandVariables)
             .Where(x => !Directory.Exists(x))
             .ForEach(x => Log.Warning("Path environment variable contains invalid or inaccessible path {Path}", x));

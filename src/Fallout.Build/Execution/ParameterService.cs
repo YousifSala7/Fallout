@@ -16,19 +16,19 @@ internal partial class ParameterService
     internal Func<string, Type, object> ArgumentsFromFilesService;
     internal ArgumentParser ArgumentsFromCommitMessageService;
 
-    private readonly Func<ArgumentParser> _argumentParserProvider;
-    private readonly Func<IReadOnlyDictionary<string, string>> _environmentVariablesProvider;
+    private readonly Func<ArgumentParser> argumentParserProvider;
+    private readonly Func<IReadOnlyDictionary<string, string>> environmentVariablesProvider;
 
     public ParameterService(
         Func<ArgumentParser> argumentParserProvider,
         Func<IReadOnlyDictionary<string, string>> environmentVariablesProvider)
     {
-        _argumentParserProvider = argumentParserProvider;
-        _environmentVariablesProvider = environmentVariablesProvider;
+        this.argumentParserProvider = argumentParserProvider;
+        this.environmentVariablesProvider = environmentVariablesProvider;
     }
 
-    private ArgumentParser ArgumentsParser => _argumentParserProvider.Invoke();
-    private IReadOnlyDictionary<string, string> Variables => _environmentVariablesProvider.Invoke();
+    private ArgumentParser ArgumentsParser => argumentParserProvider.Invoke();
+    private IReadOnlyDictionary<string, string> Variables => environmentVariablesProvider.Invoke();
 
     public static bool IsParameter(string value)
     {

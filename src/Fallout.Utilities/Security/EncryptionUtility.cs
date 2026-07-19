@@ -44,7 +44,7 @@ internal static class EncryptionUtility
     private const int V1KeyLength = 32;
     private const int V1IvLength = 16;
     private const int V1Iterations = 10_000;
-    private static readonly byte[] s_v1StaticSalt = { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 };
+    private static readonly byte[] v1StaticSalt = { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 };
 
     public static string Decrypt(string cipherText, string password, string name)
     {
@@ -127,7 +127,7 @@ internal static class EncryptionUtility
         var ciphertext = Convert.FromBase64String(base64Ciphertext);
         var passwordBytes = Encoding.UTF8.GetBytes(password);
 
-        var keyAndIv = Rfc2898DeriveBytes.Pbkdf2(passwordBytes, s_v1StaticSalt, V1Iterations, HashAlgorithmName.SHA256, V1KeyLength + V1IvLength);
+        var keyAndIv = Rfc2898DeriveBytes.Pbkdf2(passwordBytes, v1StaticSalt, V1Iterations, HashAlgorithmName.SHA256, V1KeyLength + V1IvLength);
         var key = new byte[V1KeyLength];
         var iv = new byte[V1IvLength];
         Buffer.BlockCopy(keyAndIv, 0, key, 0, V1KeyLength);
@@ -153,7 +153,7 @@ internal static class EncryptionUtility
         var plaintext = Encoding.UTF8.GetBytes(clearText);
         var passwordBytes = Encoding.UTF8.GetBytes(password);
 
-        var keyAndIv = Rfc2898DeriveBytes.Pbkdf2(passwordBytes, s_v1StaticSalt, V1Iterations, HashAlgorithmName.SHA256, V1KeyLength + V1IvLength);
+        var keyAndIv = Rfc2898DeriveBytes.Pbkdf2(passwordBytes, v1StaticSalt, V1Iterations, HashAlgorithmName.SHA256, V1KeyLength + V1IvLength);
         var key = new byte[V1KeyLength];
         var iv = new byte[V1IvLength];
         Buffer.BlockCopy(keyAndIv, 0, key, 0, V1KeyLength);

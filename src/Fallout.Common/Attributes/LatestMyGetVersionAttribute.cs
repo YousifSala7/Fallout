@@ -9,21 +9,21 @@ namespace Fallout.Common.Tooling;
 
 public class LatestMyGetVersionAttribute : ValueInjectionAttributeBase
 {
-    private readonly string _feed;
-    private readonly string _package;
+    private readonly string feed;
+    private readonly string package;
 
     public LatestMyGetVersionAttribute(string feed, string package)
     {
-        _feed = feed;
-        _package = package;
+        this.feed = feed;
+        this.package = package;
     }
 
     public override object GetValue(MemberInfo member, object instance)
     {
-        var content = HttpTasks.HttpDownloadString($"https://www.myget.org/RSS/{_feed}");
+        var content = HttpTasks.HttpDownloadString($"https://www.myget.org/RSS/{feed}");
         return XmlTasks.XmlPeekFromString(content, ".//title")
             // TODO: regex?
-            .First(x => x.Contains($"/{_package} "))
+            .First(x => x.Contains($"/{package} "))
             .Split('(').Last()
             .Split(')').First()
             .TrimStart("version ");

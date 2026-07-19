@@ -29,15 +29,15 @@ public class DirectoryGlobbingAttribute : FileSystemGlobbingAttributeBase
 
 public abstract class FileSystemGlobbingAttributeBase : ParameterAttribute
 {
-    private readonly string[] _patterns;
-    private readonly Func<AbsolutePath, string[], IEnumerable<AbsolutePath>> _globber;
+    private readonly string[] patterns;
+    private readonly Func<AbsolutePath, string[], IEnumerable<AbsolutePath>> globber;
 
     protected FileSystemGlobbingAttributeBase(
         string[] patterns,
         Func<AbsolutePath, string[], IEnumerable<AbsolutePath>> globber)
     {
-        _patterns = patterns;
-        _globber = globber;
+        this.patterns = patterns;
+        this.globber = globber;
     }
 
     public override object GetValue(MemberInfo member, object instance)
@@ -54,7 +54,7 @@ public abstract class FileSystemGlobbingAttributeBase : ParameterAttribute
             parameterValue.ForEach(x =>
                 Assert.True(
                     globbedElements.Contains(x),
-                    $"Value '{x}' for member '{member.Name}' is not contained any pattern '{_patterns.JoinCommaSpace()}'"));
+                    $"Value '{x}' for member '{member.Name}' is not contained any pattern '{patterns.JoinCommaSpace()}'"));
             Assert.True(parameterValue.Length == 1 || memberType == typeof(AbsolutePath[]),
                 $"Member '{member.Name}' can only accept a single value but got:"
                     .Concat(parameterValue.Select(x => x.ToString()))
@@ -79,7 +79,7 @@ public abstract class FileSystemGlobbingAttributeBase : ParameterAttribute
 
     private AbsolutePath[] GetGlobbedElements(MemberInfo member)
     {
-        Assert.NotEmpty(_patterns, $"Member '{member.Name}' has no globbing patterns defined");
-        return _globber(Build.RootDirectory, _patterns).ToArray();
+        Assert.NotEmpty(patterns, $"Member '{member.Name}' has no globbing patterns defined");
+        return globber(Build.RootDirectory, patterns).ToArray();
     }
 }

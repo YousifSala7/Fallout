@@ -23,18 +23,18 @@ public partial class GitHubActions : Host, IBuildServer
 
     public new static GitHubActions Instance => Host.Instance as GitHubActions;
 
-    private readonly Lazy<JsonObject> _eventContext;
-    private readonly Lazy<HttpClient> _httpClient;
-    private readonly Lazy<long> _jobId;
+    private readonly Lazy<JsonObject> eventContext;
+    private readonly Lazy<HttpClient> httpClient;
+    private readonly Lazy<long> jobId;
 
     internal GitHubActions()
     {
-        _eventContext = Lazy.Create(() =>
+        eventContext = Lazy.Create(() =>
         {
             var content = File.ReadAllText(EventPath);
             return JsonNode.Parse(content)?.AsObject() ?? new JsonObject();
         });
-        _httpClient = Lazy.Create(() =>
+        httpClient = Lazy.Create(() =>
         {
             var base64Auth = Convert.ToBase64String(Encoding.ASCII.GetBytes($":{Token.NotNull()}"));
 
@@ -44,7 +44,7 @@ public partial class GitHubActions : Host, IBuildServer
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64Auth);
             return client;
         });
-        _jobId = Lazy.Create(GetJobId);
+        jobId = Lazy.Create(GetJobId);
     }
 
     string IBuildServer.Branch => Ref;
@@ -104,9 +104,9 @@ public partial class GitHubActions : Host, IBuildServer
     // https://github.com/actions/toolkit/tree/master/packages/core/src
 
     public string Token => EnvironmentInfo.GetVariable("GITHUB_TOKEN");
-    public long JobId => _jobId.Value;
+    public long JobId => jobId.Value;
 
-    public JsonObject GitHubEvent => _eventContext.Value;
+    public JsonObject GitHubEvent => eventContext.Value;
     public bool IsPullRequest => EventName == "pull_request";
     public int? PullRequestNumber => GitHubEvent["number"]?.GetValue<int>();
     public string PullRequestAction => GitHubEvent["action"]?.GetValue<string>();

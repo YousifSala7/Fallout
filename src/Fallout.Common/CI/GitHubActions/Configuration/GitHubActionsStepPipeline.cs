@@ -11,7 +11,7 @@ namespace Fallout.Common.CI.GitHubActions.Configuration;
 /// </summary>
 public class GitHubActionsStepPipeline
 {
-    private readonly Dictionary<GitHubActionsStepPosition, List<GitHubActionsCustomStep>> _inserts =
+    private readonly Dictionary<GitHubActionsStepPosition, List<GitHubActionsCustomStep>> inserts =
         new Dictionary<GitHubActionsStepPosition, List<GitHubActionsCustomStep>>();
 
     internal GitHubActionsStepPipeline(string workflowName, GitHubActionsImage image, IReadOnlyList<GitHubActionsStep> builtInSteps)
@@ -34,8 +34,8 @@ public class GitHubActionsStepPipeline
     public void Insert(GitHubActionsStepPosition position, GitHubActionsCustomStep step)
     {
         Assert.NotNull(step);
-        if (!_inserts.TryGetValue(position, out var list))
-            _inserts[position] = list = new List<GitHubActionsCustomStep>();
+        if (!inserts.TryGetValue(position, out var list))
+            inserts[position] = list = new List<GitHubActionsCustomStep>();
         list.Add(step);
     }
 
@@ -48,7 +48,7 @@ public class GitHubActionsStepPipeline
     }
 
     internal IReadOnlyList<GitHubActionsCustomStep> GetInserts(GitHubActionsStepPosition position)
-        => _inserts.TryGetValue(position, out var list) ? list : (IReadOnlyList<GitHubActionsCustomStep>)new GitHubActionsCustomStep[0];
+        => inserts.TryGetValue(position, out var list) ? list : (IReadOnlyList<GitHubActionsCustomStep>)new GitHubActionsCustomStep[0];
 
-    internal IEnumerable<GitHubActionsCustomStep> AllInserts => _inserts.Values.SelectMany(x => x);
+    internal IEnumerable<GitHubActionsCustomStep> AllInserts => inserts.Values.SelectMany(x => x);
 }

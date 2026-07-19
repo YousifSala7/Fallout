@@ -12,9 +12,9 @@ namespace Fallout.Cli.Commands.Navigation;
 /// </summary>
 internal sealed class PushWithChosenRootDirectoryCommand : IFalloutCommand
 {
-    private readonly IConsolePrompts _prompts;
+    private readonly IConsolePrompts prompts;
 
-    public PushWithChosenRootDirectoryCommand(IConsolePrompts prompts) => _prompts = prompts;
+    public PushWithChosenRootDirectoryCommand(IConsolePrompts prompts) => this.prompts = prompts;
 
     public string Name => "PushWithChosenRootDirectory";
 
@@ -32,7 +32,7 @@ internal sealed class PushWithChosenRootDirectoryCommand : IFalloutCommand
                 .Select(x => (x, EnvironmentInfo.WorkingDirectory.GetRelativePathTo(x).ToString()))
                 .OrderBy(x => x.Item2).ToArray();
 
-            return _prompts.PromptForChoice("Where to go next?", directories);
+            return prompts.PromptForChoice("Where to go next?", directories);
         });
     }
 }

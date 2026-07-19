@@ -27,7 +27,7 @@ internal static partial class Telemetry
     private const string VersionPropertyName = "FalloutTelemetryVersion";
     private const string LegacyVersionPropertyName = "NukeTelemetryVersion";
 
-    private static readonly int? s_confirmedVersion;
+    private static readonly int? confirmedVersion;
 
     static Telemetry()
     {

@@ -7,11 +7,11 @@ namespace Fallout.Common.Tools.AzureKeyVault
     /// <summary> Attribute to obtain a certificates from from the Azure KeyVault defined by <see cref="AzureKeyVaultConfigurationAttribute"/>.</summary>
     public class AzureKeyVaultCertificateAttribute : AzureKeyVaultAttributeBase
     {
-        private readonly string _certificateName;
+        private readonly string certificateName;
 
         public AzureKeyVaultCertificateAttribute(string certificateName = null)
         {
-            _certificateName = certificateName;
+            this.certificateName = certificateName;
         }
 
         /// <summary>If set to true, the key of the certificate is also obtained.</summary>
@@ -22,7 +22,7 @@ namespace Fallout.Common.Tools.AzureKeyVault
 
         protected override object GetValue(AzureKeyVaultConfiguration configuration, MemberInfo member)
         {
-            return AzureKeyVaultTasks.GetCertificateBundle(configuration, _certificateName, IncludeKey, IncludeSecret);
+            return AzureKeyVaultTasks.GetCertificateBundle(configuration, certificateName, IncludeKey, IncludeSecret);
         }
     }
 }

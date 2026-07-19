@@ -12,9 +12,9 @@ namespace Fallout.Cli.Commands;
 /// </summary>
 internal sealed class GetConfigurationCommand : IFalloutCommand
 {
-    private readonly IConfigurationReader _configuration;
+    private readonly IConfigurationReader configuration;
 
-    public GetConfigurationCommand(IConfigurationReader configuration) => _configuration = configuration;
+    public GetConfigurationCommand(IConfigurationReader configuration) => this.configuration = configuration;
 
     public string Name => "get-configuration";
 
@@ -23,7 +23,7 @@ internal sealed class GetConfigurationCommand : IFalloutCommand
 
     private int Execute(string[] args, AbsolutePath rootDirectory, AbsolutePath buildScript)
     {
-        var configuration = _configuration.Read(buildScript.NotNull(), evaluate: false);
+        var configuration = this.configuration.Read(buildScript.NotNull(), evaluate: false);
 
         Host.Information($"Configuration from {buildScript}:");
         configuration.ForEach(x => Console.WriteLine($"{x.Key} = {x.Value}"));

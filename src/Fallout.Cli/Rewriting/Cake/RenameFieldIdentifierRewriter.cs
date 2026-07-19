@@ -10,7 +10,7 @@ namespace Fallout.Cli.Rewriting.Cake;
 
 internal class RenameFieldIdentifierRewriter : SafeSyntaxRewriter
 {
-    private readonly Dictionary<string, string> _renames = new();
+    private readonly Dictionary<string, string> renames = new();
 
     public override SyntaxNode VisitFieldDeclaration(FieldDeclarationSyntax node)
     {
@@ -18,7 +18,7 @@ internal class RenameFieldIdentifierRewriter : SafeSyntaxRewriter
             return node;
 
         string CreateRename(string name)
-            => _renames[name] = name.Capitalize().ReplaceKnownWords();
+            => renames[name] = name.Capitalize().ReplaceKnownWords();
 
         var renamedVariables = node.Declaration.Variables
             .Select(x => x.WithIdentifier(Identifier(CreateRename(x.Identifier.Text))));
@@ -30,7 +30,7 @@ internal class RenameFieldIdentifierRewriter : SafeSyntaxRewriter
 
     public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node)
     {
-        return _renames.TryGetValue(node.Identifier.Text, out var rename)
+        return renames.TryGetValue(node.Identifier.Text, out var rename)
             ? IdentifierName(rename)
             : node;
     }

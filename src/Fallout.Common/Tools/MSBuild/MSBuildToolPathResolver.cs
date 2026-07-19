@@ -9,7 +9,7 @@ namespace Fallout.Common.Tools.MSBuild;
 
 public static class MSBuildToolPathResolver
 {
-    private static readonly MSBuildPlatform[] s_platforms = { MSBuildPlatform.x86, MSBuildPlatform.x64 };
+    private static readonly MSBuildPlatform[] platforms = { MSBuildPlatform.x86, MSBuildPlatform.x64 };
 
     public static string Resolve(MSBuildVersion? msBuildVersion = null, MSBuildPlatform? msBuildPlatform = null)
     {
@@ -36,14 +36,14 @@ public static class MSBuildToolPathResolver
 
         instances.AddRange(
             from version in new[] { MSBuildVersion.VS2026, MSBuildVersion.VS2022, MSBuildVersion.VS2019, MSBuildVersion.VS2017 }
-            from platform in s_platforms
+            from platform in platforms
             from edition in typeof(VisualStudioEdition).GetEnumValues<VisualStudioEdition>()
             let folder = GetProgramFilesFolder(version, edition)
             select GetFromVs2017Instance(version, platform, edition, folder));
 
         instances.AddRange(
             from version in new[] { MSBuildVersion.VS2015, MSBuildVersion.VS2013 }
-            from platform in s_platforms
+            from platform in platforms
             select GetVs2013To2015Instance(platform, version));
 
         var preferedPlatform = EnvironmentInfo.Is64Bit ? MSBuildPlatform.x64 : MSBuildPlatform.x86;

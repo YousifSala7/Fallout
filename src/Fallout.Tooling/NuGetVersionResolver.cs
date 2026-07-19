@@ -8,7 +8,7 @@ namespace Fallout.Common.Tooling;
 
 public static class NuGetVersionResolver
 {
-    private static readonly HttpClient s_client = new();
+    private static readonly HttpClient client = new();
 
     public static async Task<string> GetLatestVersion(string packageId, bool includePrereleases, bool includeUnlisted = false)
     {
@@ -17,7 +17,7 @@ public static class NuGetVersionResolver
             var url = includeUnlisted
                 ? $"https://api.nuget.org/v3/flatcontainer/{packageId.ToLowerInvariant()}/index.json"
                 : $"https://api-v2v3search-0.nuget.org/query?q=packageid:{packageId}&prerelease={includePrereleases}";
-            var jsonString = await s_client.GetStringAsync(url);
+            var jsonString = await client.GetStringAsync(url);
             var jsonObject = JsonNode.Parse(jsonString)?.AsObject().NotNull();
 
             if (includeUnlisted)

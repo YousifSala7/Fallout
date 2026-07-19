@@ -52,15 +52,15 @@ internal class ClassRewriter : SafeSyntaxRewriter
             typeof(EnvironmentInfo),
         };
 
-    private string _defaultTargetFieldName;
-    private string _defaultTargetName;
+    private string defaultTargetFieldName;
+    private string defaultTargetName;
 
     public override SyntaxNode VisitCompilationUnit(CompilationUnitSyntax node)
     {
         node = (CompilationUnitSyntax) base.VisitCompilationUnit(node).NotNull();
 
         var defaultTargetField = node.Members.OfType<FieldDeclarationSyntax>()
-            .SingleOrDefault(x => x.GetSingleDeclarator().Identifier.Text == _defaultTargetFieldName);
+            .SingleOrDefault(x => x.GetSingleDeclarator().Identifier.Text == defaultTargetFieldName);
         if (defaultTargetField != null)
         {
             var literalExpression = defaultTargetField.GetSingleDeclarator().Initializer?.Value as LiteralExpressionSyntax;
@@ -68,9 +68,9 @@ internal class ClassRewriter : SafeSyntaxRewriter
             var mainMethodDeclaration = ParseMemberDeclaration($"public static int Main() => Execute<Build>(x => x.{defaultTarget});");
             node = node.WithMembers(List(new[] { mainMethodDeclaration }.Concat(node.Members.Except(new[] { defaultTargetField }))));
         }
-        else if (_defaultTargetName != null)
+        else if (defaultTargetName != null)
         {
-            var mainMethodDeclaration = ParseMemberDeclaration($"public static int Main() => Execute<Build>(x => x.{_defaultTargetName});");
+            var mainMethodDeclaration = ParseMemberDeclaration($"public static int Main() => Execute<Build>(x => x.{defaultTargetName});");
             node = node.WithMembers(List(new[] { mainMethodDeclaration }.Concat(node.Members)));
         }
 
@@ -117,9 +117,9 @@ internal class ClassRewriter : SafeSyntaxRewriter
         {
             var expression = invocationExpression.GetSingleArgument<ExpressionSyntax>();
             if (expression is IdentifierNameSyntax targetIdentifier)
-                _defaultTargetFieldName = targetIdentifier.Identifier.Text;
+                defaultTargetFieldName = targetIdentifier.Identifier.Text;
             if (expression is LiteralExpressionSyntax literalExpression)
-                _defaultTargetName = literalExpression.GetConstantValue<string>();
+                defaultTargetName = literalExpression.GetConstantValue<string>();
             return null;
         }
 

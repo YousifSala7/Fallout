@@ -15,7 +15,7 @@ namespace Fallout.CodeGeneration;
 
 public static class ReferenceUpdater
 {
-    private static HttpClient s_client = new();
+    private static HttpClient client = new();
 
     public static void UpdateReferences(string specificationsDirectory, string referencesDirectory = null)
     {
@@ -56,7 +56,7 @@ public static class ReferenceUpdater
         var referenceValues = reference.Split('#');
         var tempFile = Path.GetTempFileName();
 
-        var response = await s_client.CreateRequest(HttpMethod.Get, referenceValues[0])
+        var response = await client.CreateRequest(HttpMethod.Get, referenceValues[0])
             .GetResponseAsync();
         await response.WriteToFile(tempFile);
 

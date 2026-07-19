@@ -17,8 +17,8 @@ namespace Fallout.Common.CI.AppVeyor;
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public class AppVeyorAttribute : ConfigurationAttributeBase
 {
-    private readonly string _suffix;
-    private readonly AppVeyorImage[] _images;
+    private readonly string suffix;
+    private readonly AppVeyorImage[] images;
 
     public AppVeyorAttribute(
         AppVeyorImage image,
@@ -32,16 +32,16 @@ public class AppVeyorAttribute : ConfigurationAttributeBase
         AppVeyorImage image,
         params AppVeyorImage[] images)
     {
-        _suffix = suffix;
-        _images = new[] { image }.Concat(images).ToArray();
+        this.suffix = suffix;
+        this.images = new[] { image }.Concat(images).ToArray();
     }
 
-    public override string IdPostfix => _suffix;
+    public override string IdPostfix => suffix;
 
     public override Type HostType => typeof(AppVeyor);
     public override AbsolutePath ConfigurationFile => Build.RootDirectory / ConfigurationFileName;
     public override IEnumerable<AbsolutePath> GeneratedFiles => new[] { ConfigurationFile };
-    private string ConfigurationFileName => _suffix != null ? $"appveyor.{_suffix}.yml" : "appveyor.yml";
+    private string ConfigurationFileName => suffix != null ? $"appveyor.{suffix}.yml" : "appveyor.yml";
 
     public override IEnumerable<string> RelevantTargetNames => InvokedTargets;
     public override IEnumerable<string> IrrelevantTargetNames => new string[0];
@@ -70,7 +70,7 @@ public class AppVeyorAttribute : ConfigurationAttributeBase
     {
         return new AppVeyorConfiguration
                {
-                   Images = _images,
+                   Images = images,
                    BuildCmdPath = BuildCmdPath,
                    Services = Services,
                    Branches = GetBranches(),

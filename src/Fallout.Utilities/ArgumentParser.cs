@@ -46,7 +46,7 @@ internal class ArgumentParser
             .ToArray();
     }
 
-    private readonly string[] _arguments;
+    private readonly string[] arguments;
 
     public ArgumentParser(string arguments)
         : this(Parse(arguments))
@@ -55,10 +55,10 @@ internal class ArgumentParser
 
     public ArgumentParser(IEnumerable<string> arguments)
     {
-        _arguments = arguments.ToArray();
+        this.arguments = arguments.ToArray();
     }
 
-    public IReadOnlyList<string> Arguments => _arguments;
+    public IReadOnlyList<string> Arguments => arguments;
 
     public bool HasArgument(string argumentName)
     {
@@ -71,13 +71,13 @@ internal class ArgumentParser
         if (index == -1)
             return destinationType.GetDefaultValue();
 
-        var values = _arguments.Skip(index + 1).TakeUntil(IsArgument).ToArray();
+        var values = arguments.Skip(index + 1).TakeUntil(IsArgument).ToArray();
         return ConvertArgument(argumentName, values, destinationType, separator);
     }
 
     public object GetPositionalArgument(int position, Type destinationType, char? separator = null)
     {
-        var positionalArgumentsCount = _arguments.TakeUntil(IsArgument).Count();
+        var positionalArgumentsCount = arguments.TakeUntil(IsArgument).Count();
         if (position < 0)
             position = positionalArgumentsCount + position % positionalArgumentsCount;
 
@@ -86,7 +86,7 @@ internal class ArgumentParser
 
         return ConvertArgument(
             $"$positional[{position}]",
-            new[] { _arguments[position] },
+            new[] { arguments[position] },
             destinationType,
             separator);
     }
@@ -107,7 +107,7 @@ internal class ArgumentParser
     private int GetArgumentIndex(string argumentName)
     {
         var argumentMemberName = GetArgumentMemberName(argumentName);
-        return Array.FindLastIndex(_arguments, x => IsArgument(x) && GetArgumentMemberName(x).EqualsOrdinalIgnoreCase(argumentMemberName));
+        return Array.FindLastIndex(arguments, x => IsArgument(x) && GetArgumentMemberName(x).EqualsOrdinalIgnoreCase(argumentMemberName));
     }
 
     private object ConvertArgument(
@@ -130,7 +130,7 @@ internal class ArgumentParser
         {
             Assert.Fail(
                 new[] { ex.Message, "Arguments were:" }
-                    .Concat(_arguments.Select((x, i) => $"  [{i}] = {x}"))
+                    .Concat(arguments.Select((x, i) => $"  [{i}] = {x}"))
                     .JoinNewLine());
             // ReSharper disable once HeuristicUnreachableCode
             return null;

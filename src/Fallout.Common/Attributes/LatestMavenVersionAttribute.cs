@@ -10,23 +10,23 @@ namespace Fallout.Common.Tooling;
 
 public class LatestMavenVersionAttribute : ValueInjectionAttributeBase
 {
-    private readonly string _repository;
-    private readonly string _groupId;
-    private readonly string _artifactId;
+    private readonly string repository;
+    private readonly string groupId;
+    private readonly string artifactId;
 
     public LatestMavenVersionAttribute(string repository, string groupId, string artifactId = null)
     {
-        _repository = repository;
-        _groupId = groupId;
-        _artifactId = artifactId;
+        this.repository = repository;
+        this.groupId = groupId;
+        this.artifactId = artifactId;
     }
 
     public bool IncludePrerelease { get; set; }
 
     public override object GetValue(MemberInfo member, object instance)
     {
-        var endpoint = _repository.TrimStart("https").TrimStart("http").TrimStart("://").TrimEnd("/");
-        var uri = $"https://{endpoint}/{_groupId.Replace(".", "/")}/{_artifactId ?? _groupId}/maven-metadata.xml";
+        var endpoint = repository.TrimStart("https").TrimStart("http").TrimStart("://").TrimEnd("/");
+        var uri = $"https://{endpoint}/{groupId.Replace(".", "/")}/{artifactId ?? groupId}/maven-metadata.xml";
         var content = HttpTasks.HttpDownloadString(uri);
         var versions = XmlTasks.XmlPeekFromString(content, ".//version").ToList();
         var version = versions

@@ -11,7 +11,7 @@ public partial class GitHubActions
 {
     public async Task CreateComment(int issue, string text)
     {
-        await _httpClient.Value
+        await httpClient.Value
             .CreateRequest(HttpMethod.Post, $"repos/{Repository}/issues/{issue}/comments")
             .WithJsonContent(new { body = text })
             .GetResponseAsync();
@@ -19,7 +19,7 @@ public partial class GitHubActions
 
     private JsonObject GetJobDetails(long runId)
     {
-        var response = _httpClient.Value
+        var response = httpClient.Value
             .CreateRequest(HttpMethod.Get, $"repos/{Repository}/actions/runs/{runId}/jobs")
             .GetResponse()
             .AssertSuccessfulStatusCode();

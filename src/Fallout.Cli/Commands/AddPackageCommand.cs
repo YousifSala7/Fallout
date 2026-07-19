@@ -14,13 +14,13 @@ namespace Fallout.Cli.Commands;
 /// </summary>
 internal sealed class AddPackageCommand : IFalloutCommand
 {
-    private readonly IConfigurationReader _configuration;
-    private readonly IPackageManager _packages;
+    private readonly IConfigurationReader configuration;
+    private readonly IPackageManager packages;
 
     public AddPackageCommand(IConfigurationReader configuration, IPackageManager packages)
     {
-        _configuration = configuration;
-        _packages = packages;
+        this.configuration = configuration;
+        this.packages = packages;
     }
 
     public string Name => "add-package";
@@ -40,17 +40,17 @@ internal sealed class AddPackageCommand : IFalloutCommand
              NuGetPackageResolver.GetGlobalInstalledPackage(packageId, version: null, packagesConfigFile: null)?.Version.ToString())
             .NotNull("packageVersion != null");
 
-        var configuration = _configuration.Read(buildScript, evaluate: true);
+        var configuration = this.configuration.Read(buildScript, evaluate: true);
         var buildProjectFile = configuration[ConfigurationReader.BuildProjectFileKey];
         Host.Information($"Installing {packageId}/{packageVersion} to {buildProjectFile} ...");
-        _packages.AddOrReplacePackage(packageId, packageVersion, PackageManager.DownloadType, buildProjectFile);
+        packages.AddOrReplacePackage(packageId, packageVersion, PackageManager.DownloadType, buildProjectFile);
         DotNetTasks.DotNet($"restore {buildProjectFile}");
 
         var installedPackage = NuGetPackageResolver.GetGlobalInstalledPackage(packageId, packageVersion, packagesConfigFile: null)
             .NotNull("installedPackage != null");
         var hasToolsDirectory = installedPackage.Directory.GlobDirectories("tools").Any();
         if (!hasToolsDirectory)
-            _packages.AddOrReplacePackage(packageId, packageVersion, PackageManager.ReferenceType, buildProjectFile);
+            packages.AddOrReplacePackage(packageId, packageVersion, PackageManager.ReferenceType, buildProjectFile);
 
         Host.Information($"Done installing {packageId}/{packageVersion} to {buildProjectFile}");
         return 0;

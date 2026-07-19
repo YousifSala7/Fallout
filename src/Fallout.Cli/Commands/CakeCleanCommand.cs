@@ -11,9 +11,9 @@ namespace Fallout.Cli.Commands;
 /// </summary>
 internal sealed class CakeCleanCommand : IFalloutCommand
 {
-    private readonly IConsolePrompts _prompts;
+    private readonly IConsolePrompts prompts;
 
-    public CakeCleanCommand(IConsolePrompts prompts) => _prompts = prompts;
+    public CakeCleanCommand(IConsolePrompts prompts) => this.prompts = prompts;
 
     public string Name => "cake-clean";
 
@@ -26,7 +26,7 @@ internal sealed class CakeCleanCommand : IFalloutCommand
         Host.Information("Found .cake files:");
         cakeFiles.ForEach(x => Host.Debug($"  - {x}"));
 
-        if (_prompts.PromptForConfirmation("Delete?"))
+        if (prompts.PromptForConfirmation("Delete?"))
             cakeFiles.ForEach(x => x.DeleteFile());
 
         return 0;

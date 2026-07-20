@@ -86,6 +86,7 @@ Shaped by [milestone #18](https://github.com/Fallout-build/Fallout/milestone/18)
 
 ## What not to do
 
+- **Never ping the former NUKE maintainer, Matthias Koch (GitHub handle `matkoch`).** He no longer maintains this project and does not want the notifications. Do **not** `@`-mention him (never write `@` before his handle — not in issues, PRs, comments, commit messages, *or* committed files), add him as a PR/issue reviewer or assignee, request his review, tag him in issue/PR/commit-comment text, or add him as a commit co-author or `Co-authored-by:` trailer — on any GitHub surface, from any AI tool. When you need to credit NUKE's origin, use his name or a plain profile link (`https://github.com/matkoch`) — just never with a leading `@`, which is what fires a mention.
 - Don't reintroduce `source/` — production code lives under `src/`, tests under `tests/`. Same for `images/` (now `.assets/`).
 - Don't add `main` (or any working-branch pattern) to the **push** triggers of the cross-platform workflows — they're release-intent-gated on purpose (milestone #18 / #318 / #326).
 - Don't add `submodules: recursive` to checkouts — there are no submodules (no `.gitmodules`); it's a dead init step.

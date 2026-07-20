@@ -5,7 +5,7 @@ Three groups: conventions to respect, things never to do, and the tool-wrapper r
 ## Conventions worth respecting
 
 - **Centralized package versions** — add new packages to `Directory.Packages.props`, never inline. Adding a *meaningful* library (not a tiny transitive helper)? Add a row to [docs/dependencies.md](https://github.com/Fallout-build/Fallout/blob/main/docs/dependencies.md) in the same PR — reviewers will ask.
-- **Test naming follows AV1600 behavior-focused style.** Write test names as short, present-tense descriptions of observable behavior, not method calls. Example good: `Missing_changelog_does_not_add_a_full_changelog_link_to_release_notes`. Example bad: `GetNuGetReleaseNotes_WithMissingChangelog_AndGitHubRepository_DoesNotThrow`. Focus on "what happens" not "what method is called" (see [AV1600](references/testability.md#AV1620)).
+- **Test naming follows AV1600 behavior-focused style.** Write test names as short, present-tense descriptions of observable behavior, not method calls. Example good: `Missing_changelog_does_not_add_a_full_changelog_link_to_release_notes`. Example bad: `GetNuGetReleaseNotes_WithMissingChangelog_AndGitHubRepository_DoesNotThrow`. Focus on "what happens" not "what method is called" (see [AV1600](https://csharpcodingguidelines.com/testability-guidelines/#AV1620)).
 - **Test files and classes use `Specs` suffix.** Name test projects `Foo.Specs`, test files `FooSpecs.cs`, and test classes `FooSpecs`. Use `Specs` not `Test` or `Tests` — it clarifies that the class describes the expected behavior (specification) of the subject under test.
 - **Tool wrappers**: copy/paste from neighbours; cover full commands; use `<c>`, `<a>`, `<ul>`/`<ol>`, `<em>`, `<para/>` in `help`; don't write `secret: false` or `default: xxx`. See [Tool wrapper recipe](#tool-wrapper-recipe) below.
 - **Tests next to code, separate folder**: every `Foo` project under `src/` has a sibling `Foo.Tests` project under `tests/`. Mirror the namespace.
@@ -51,7 +51,7 @@ public sealed class NewPluginHost
 
 ## `[Obsolete]` for deprecating public APIs
 
-When a public API is on its way out, mark it with [`System.ObsoleteAttribute`](https://learn.microsoft.com/dotnet/api/system.obsoleteattribute) and give it a `DiagnosticId`. This is the sanctioned deprecation path under [AGENTS.md rule #2](../../AGENTS.md) — keep the old surface working (usually bridging to the replacement) while steering consumers to the new one. `DiagnosticId`/`UrlFormat` ship in the .NET 5+ BCL — **no package reference needed** (the repo targets .NET 10).
+When a public API is on its way out, mark it with [`System.ObsoleteAttribute`](https://learn.microsoft.com/dotnet/api/system.obsoleteattribute) and give it a `DiagnosticId`. This is the sanctioned deprecation path under [AGENTS.md rule #2](https://github.com/Fallout-build/Fallout/blob/main/AGENTS.md/AGENTS.md) — keep the old surface working (usually bridging to the replacement) while steering consumers to the new one. `DiagnosticId`/`UrlFormat` ship in the .NET 5+ BCL — **no package reference needed** (the repo targets .NET 10).
 
 ```csharp
 using System;
